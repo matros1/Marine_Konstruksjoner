@@ -34,6 +34,8 @@ def main():
 
     plot(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray)
 
+    #dette er en forandring
+
     return 0
 
 main()
