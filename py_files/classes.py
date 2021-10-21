@@ -153,7 +153,17 @@ class Beam:
             self.q2 = load[3]/np.sin(self.orientation) + load[4]/np.cos(self.orientation)
 
     def calculateFIM(self):
-        pass
+        if(self.q1 == self.q2):
+            self.m1 = (1/12)*self.q1*(self.length)**2
+            self.m2 = -(1/12)*self.q1*(self.length)**2
+        elif(abs(self.q1) < abs(self.q2)):
+            self.m1 = (1/12)*self.q1*(self.length)**2 + (1/30)*self.q2*(self.length)**2
+            self.m2 = -(1/12)*self.q1*(self.length)**2 - (1/20)*self.q2*(self.length)**2 
+        else:
+            self.m1 = (1/12)*self.q1*(self.length)**2 + (1/20)*self.q2*(self.length)**2
+            self.m2 = -(1/12)*self.q1*(self.length)**2 - (1/30)*self.q2*(self.length)**2 
+            
+            
     #TODO
 
 
