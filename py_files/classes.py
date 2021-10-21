@@ -107,7 +107,7 @@ class Beam:
         '''
         self.number = beamNumber
 
-    def transformToGlobalStiffnessMatrix(self):
+    def makeTransformedStiffnessMatrix(self):
         '''
         Transforms the beams local stiffnessmatrix to the global orientation, 
         making it ready to be put in the global system-stiffnessmatrix.
@@ -125,14 +125,36 @@ class Beam:
             [0,         0,          0,  0,          0,          1]])
 
         T_transponent = np.array([
-            [(10*np.cos(a)+5*np.cos(3*a)+np.cos(5*a))/(8*np.cos(2*a)+2*np.cos(4*a)+6),  (np.sin(a)+np.sin(3*a))/(2*np.cos(2*a)+2),  0,  0,  0,  0],
-            [(-np.sin(a)-np.sin(3*a))/(2*np.cos(2*a)+2),                                np.cos(a),                                  0,  0,  0,  0],
-            [0,                                                                         0,                                          1,  0,  0,  0],
-            [0, 0,  0,  (4*np.cos(2*a)+np.cos(4*a)+3)/(6*np.cos(a)+2*np.cos(3*a)),      np.sin(2*a)/(2*np.cos(a)),  0],
-            [0, 0,  0,  -np.sin(2*a)/(2*np.cos(a)),                                     (np.cos(2*a)+1)/(2*np.cos(a)), 0],
-            [0, 0,  0,  0,                                                              0,                          1]])
+            [(10*np.cos(a)+5*np.cos(3*a)+np.cos(5*a))/(8*np.cos(2*a)+2*np.cos(4*a)+6),  (np.sin(a)+np.sin(3*a))/(2*np.cos(2*a)+2),  0,  0,                                                              0,                              0],
+            [(-np.sin(a)-np.sin(3*a))/(2*np.cos(2*a)+2),                                np.cos(a),                                  0,  0,                                                              0,                              0],
+            [0,                                                                         0,                                          1,  0,                                                              0,                              0],
+            [0,                                                                         0,                                          0,  (4*np.cos(2*a)+np.cos(4*a)+3)/(6*np.cos(a)+2*np.cos(3*a)),      np.sin(2*a)/(2*np.cos(a)),      0],
+            [0,                                                                         0,                                          0,  -np.sin(2*a)/(2*np.cos(a)),                                     (np.cos(2*a)+1)/(2*np.cos(a)),  0],
+            [0,                                                                         0,                                          0,  0,                                                              0,                              1]])
 
-        self.localStiffnessMatrixGlobalOrientation = np.matmul(T, np.matmul(self.localStiffnessMatrix, T_transponent))
+        self.transformedStiffnessMatrix = np.matmul(T, np.matmul(self.localStiffnessMatrix, T_transponent))
+
+    def addDistributedNormalLoad(self, load):
+        '''
+        Adds the distributed load to the beam
+        param: load: list with load data, in global orientation
+        return: adds q1 and q2 to the beam object, where q1 is the normal
+            load working on N1, and q2 for N2
+            Note:   positive load is difined as upwards(positive z) in the beams local orientation
+        '''
+        if(self.orientation == 0):
+            self.q1 = load[2]
+            self.q2 = load[4]
+        elif(self.orientation == 1):
+            self.q1 = load[1]
+            self.q2 = load[3]
+        else:
+            self.q1 = load[1]/np.sin(self.orientation) + load[2]/np.cos(self.orientation)
+            self.q2 = load[3]/np.sin(self.orientation) + load[4]/np.cos(self.orientation)
+
+    def calculateFIM(self):
+        pass
+    #TODO
 
 
 class Node:

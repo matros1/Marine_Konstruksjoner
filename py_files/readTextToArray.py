@@ -51,5 +51,6 @@ def readAll():
     # Nodenr, Fx, Fy, Fz, Mx, My, Mz
 
     BEAMLOAD = readCSV_int("txt_files/BeamLoadData.txt")
+    #Bjelkenr, q1x, q1y, q2x, q2y
 
     return NODE,BEAM,MATERIAL,NODELOAD,BEAMLOAD

@@ -15,7 +15,7 @@ def main():
 
     #Makes lists of node objects and beam objects from nodes and beams np arrays
     nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray, beamArray)
-
+    connectDistributedNormalLoadsToBeams(beamsObjectList, beamloadArray)
 
     #SystemStivhetsMatrise med bare 0-er
     SSM = getGlobalStiffnessMatrixOfZeros(len(nodesObjectList)*3)
@@ -30,7 +30,7 @@ def main():
 
     #Plots. Here we use the imported library structure visualization to visualize our frame.
     #TODO. Make a visualization of deformations.
-    print(nodeArray,beamArray)
+    
 
     plot(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray)
 
