@@ -76,15 +76,17 @@ def makeListOfNodeAndBeamClasses(NODE, BEAM):
 
     return nodesObjectList, beamsObjectList
 
-def connectDistributedNormalLoadsToBeams(beamsObjectList, beamloadArray):
+def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray):
     '''
     Connects the distributed loads to the beam objects
     :param beamsObjectList: list of all Beam-objects
     :param beamloadArray: np array of all distributed loads
-    :return: uses member funtion .addDistributedLoad(beamload), 
-        where beamload is a list with data for the distributed load 
+    :return: uses member funtion Beam.addDistributedLoad(beamload), 
+        where beamload is a list with data for the distributed load
+        also uses member function Beam.calculateFIM() 
     '''
     for i in range(len(beamloadArray)):
         for j in range(len(beamsObjectList)):
             if(beamsObjectList[j].number == beamloadArray[i][0]):
-               beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i]) 
+               beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i])
+               beamsObjectList[j].calculateFIM() 
