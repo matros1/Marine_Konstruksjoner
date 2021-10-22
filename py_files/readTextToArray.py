@@ -48,7 +48,7 @@ def readAll():
     # 1 er stål og 2 er aluminium
 
     NODELOAD = readCSV_int("txt_files/NodeLoadData.txt")
-    # Nodenr, Fx, Fy, Fz, Mx, My, Mz
+    # Nodenr, Fx, Fz, My
 
     BEAMLOAD = readCSV_int("txt_files/BeamLoadData.txt")
     #Bjelkenr, q1x, q1y, q2x, q2y

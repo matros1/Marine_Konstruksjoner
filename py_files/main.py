@@ -15,26 +15,23 @@ def main():
 
     #Makes lists of node objects and beam objects from nodes and beams np arrays
     nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray, beamArray)
+
+    #Connects the distributed loads to the beam objects,
+    #and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
     connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray)
+
+    #Connects nodeloads to the nodes
+    connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
+
+    #Makes the Resulting Load Vector
+    makeResultingLoadVector(nodesObjectList)
 
     #SystemStivhetsMatrise med bare 0-er
     SSM = getGlobalStiffnessMatrixOfZeros(len(nodesObjectList)*3)
 
-    # TODO - ElementStivhetsMatrise
-    ESM = 0
-
-    # TODO -Fastinnspenningsmomenter
-    # As all our load is located at nodes, this vector will be 0 (?).
-    FIM = 0
-    # TODO: createElementStiffnessMatrix()
-
     #Plots. Here we use the imported library structure visualization to visualize our frame.
-    #TODO. Make a visualization of deformations.
-    
-
     plot(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray)
-
-    #dette er en forandring
+    #TODO. Make a visualization of deformations.
 
     return 0
 
