@@ -15,7 +15,7 @@ def main():
 
     #Makes lists of node objects and beam objects from nodes and beams np arrays
     nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray, beamArray)
-    connectDistributedNormalLoadsToBeams(beamsObjectList, beamloadArray)
+    connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray)
 
     #SystemStivhetsMatrise med bare 0-er
     SSM = getGlobalStiffnessMatrixOfZeros(len(nodesObjectList)*3)
