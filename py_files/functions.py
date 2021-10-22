@@ -72,5 +72,19 @@ def makeListOfNodeAndBeamClasses(NODE, BEAM):
         N1 = nodesObjectList[int(BEAM[j][0])-1]
         N2 = nodesObjectList[int(BEAM[j][1])-1]
         beamsObjectList.append(Beam(N1,N2))
+        beamsObjectList[j].giveNumber(j+1)
 
     return nodesObjectList, beamsObjectList
+
+def connectDistributedNormalLoadsToBeams(beamsObjectList, beamloadArray):
+    '''
+    Connects the distributed loads to the beam objects
+    :param beamsObjectList: list of all Beam-objects
+    :param beamloadArray: np array of all distributed loads
+    :return: uses member funtion .addDistributedLoad(beamload), 
+        where beamload is a list with data for the distributed load 
+    '''
+    for i in range(len(beamloadArray)):
+        for j in range(len(beamsObjectList)):
+            if(beamsObjectList[j].number == beamloadArray[i][0]):
+               beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i]) 
