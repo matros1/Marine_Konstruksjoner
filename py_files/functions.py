@@ -67,6 +67,7 @@ def makeListOfNodeAndBeamClasses(NODE, BEAM):
 
     for i in range(len(NODE)):
         nodesObjectList.append(Node(NODE[i][0],NODE[i][1],NODE[i][2],NODE[i][3],NODE[i][4]))
+        nodesObjectList[i].giveNumber(i+1)
 
     for j in range(len(BEAM)):
         N1 = nodesObjectList[int(BEAM[j][0])-1]
@@ -78,7 +79,9 @@ def makeListOfNodeAndBeamClasses(NODE, BEAM):
 
 def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray):
     '''
-    Connects the distributed loads to the beam objects
+    Connects the distributed loads to the beam objects,
+        and calculates Fixed Clamping Moment (FastInnspenningsmomenter)
+        for each beam affected by the distributed loads
     :param beamsObjectList: list of all Beam-objects
     :param beamloadArray: np array of all distributed loads
     :return: uses member funtion Beam.addDistributedLoad(beamload), 
@@ -89,4 +92,31 @@ def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloa
         for j in range(len(beamsObjectList)):
             if(beamsObjectList[j].number == beamloadArray[i][0]):
                beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i])
-               beamsObjectList[j].calculateFIM() 
+               beamsObjectList[j].calculateFIM()
+               #beamsObjectList[j].calculateFISheer(), see classes.py
+
+def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
+    '''
+    Conncts the nodeloads to the node objects
+    param nodesObjectList: list of all Node objects
+    param nodeloadArray: np array of all node loads
+    '''
+    for i in range(len(nodeloadArray)):
+        for j in range(len(nodesObjectList)):
+            if(nodesObjectList[j].number == nodeloadArray[i][0]):
+                nodesObjectList[j].addNodeLoad(nodeloadArray[i])
+
+def makeResultingLoadVector(nodesObjectList):
+    '''
+    Makes list of Fixed Clamping Forces and Vectors
+    K*r = R
+    K: Global Stiffness Matrix
+    r: Deformation vector
+    R: Loadvector
+    '''
+    R = []
+    for i in range(len(nodesObjectList)):
+        R.append(-nodesObjectList[i].Fx)
+        R.append(-nodesObjectList[i].Fz)
+        R.append(-nodesObjectList[i].M)
+    return np.array(R)

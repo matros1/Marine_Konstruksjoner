@@ -22,14 +22,6 @@ class Beam:
         self.z2 = NODE2.z
         self.orientation = self.get_global_oriantation()
         self.length = self.get_length()
-        # The following parameters might be useful later on.
-        # self.load
-        # self.N1
-        # self.V1
-        # self.M1
-        # self.N2
-        # self.V2
-        # self.M2
 
     def makePipe(self, r, ratioAir):
         '''
@@ -157,42 +149,41 @@ class Beam:
     def calculateFIM(self):
         '''
         Calculates FIM for beams affected by distributed loads
-        Also adds FIM to the nodes affected
+        Adds FIM to the nodes affected
         Based on table found in "TMR4167 Marin teknikk 2 – Konstruksjoner - Del 1", page 281
         '''
-        if(self.q1 == self.q2):
-            self.m1 = (1/12)*self.q1*(self.length)**2
-            self.m2 = -(1/12)*self.q1*(self.length)**2
-        elif(abs(self.q1) < abs(self.q2)):
-            self.m1 = (1/12)*self.q1*(self.length)**2 + (1/30)*self.q2*(self.length)**2
-            self.m2 = -(1/12)*self.q1*(self.length)**2 - (1/20)*self.q2*(self.length)**2 
-        else:
-            self.m1 = (1/12)*self.q1*(self.length)**2 + (1/20)*self.q2*(self.length)**2
-            self.m2 = -(1/12)*self.q1*(self.length)**2 - (1/30)*self.q2*(self.length)**2
-        self.node1.M += self.m1
-        self.node2.M += self.m2
-            
-            
-    #TODO
+        self.node1.M += (1/20)*self.q1*(self.length)**2 + (1/30)*self.q2*(self.length)**2
+        self.node2.M += -(1/30)*self.q1*(self.length)**2 - (1/20)*self.q2*(self.length)**2
 
+    #TODO
+    """ def calculateFISheer(self):
+        '''
+        Calculates Fixed Clamping Sheerforces from distributed loads
+        '''
+        self.node1.Fx += np.sin(self.orientation)*(something)
+        self.node1.Fy += np.cos(self.orientation)*(something)
+
+        self.node2.Fx += np.sin(self.orientation)*(something)
+        self.node2.Fy += np.cos(self.orientation)*(something) 
+    """
 
 class Node:
     '''
-    This class is mostly used to create beams, as beams require 2 nodes to be created.
-    It can also be used to give displacements. But so far I dont completely understand
-    how to make the element matrises. When these materices are created we can use node objects to
-    add displacements in the global coordinate system.
-    N, V, and M is here: (in norwegian) fastinnspenningsaksialkraft, fastinnspenningsskjerkraft og fastinnspenningsmoment)
-    We can use this to create a R-vector of all the FI-loads
+    This class is mostly used to create beams, but also to store
+    data about displacements and fixed clamping forces and moments
+    We can use this to create the R-vector
     '''
     def __init__(self, x, z, u, w, ø):
+        #Coordinates
         self.x = x
         self.z = z
+        #Displacements and rotations
         self.u = u
         self.w = w
         self.ø = ø
-        self.N = 0
-        self.V = 0
+        #Fixed Clamping Forces and Moment
+        self.Fx = 0
+        self.Fz = 0
         self.M = 0
 
     def giveNumber(self,nodeNumber):
@@ -202,4 +193,9 @@ class Node:
         :return: applies number to node.
         '''
         self.number = nodeNumber
+
+    def addNodeLoad(self, nodeLoad):
+        self.Fx += nodeLoad[1]
+        self.Fz += nodeLoad[2]
+        self.M += nodeLoad[3]
 
