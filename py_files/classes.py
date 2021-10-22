@@ -145,7 +145,7 @@ class Beam:
         if(self.orientation == 0):
             self.q1 = load[2]
             self.q2 = load[4]
-        elif(self.orientation == 1):
+        elif(np.cos(self.orientation) == 0):
             self.q1 = load[1]
             self.q2 = load[3]
         else:
