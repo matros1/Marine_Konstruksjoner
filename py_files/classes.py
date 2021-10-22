@@ -13,11 +13,13 @@ class Beam:
     This is a beam class. It includes multiple in house functions. Some is called when initializing and some
     can be called if you want to add info to the beam, such as geometry or number.
     '''
-    def __init__(self, N1, N2):
-        self.x1 = N1.x
-        self.x2 = N2.x
-        self.z1 = N1.z
-        self.z2 = N2.z
+    def __init__(self, NODE1, NODE2):
+        self.node1 = NODE1
+        self.x1 = NODE1.x
+        self.z1 = NODE1.z
+        self.node2 = NODE2
+        self.x2 = NODE2.x
+        self.z2 = NODE2.z
         self.orientation = self.get_global_oriantation()
         self.length = self.get_length()
         # The following parameters might be useful later on.
@@ -139,7 +141,7 @@ class Beam:
         Adds the distributed load to the beam
         param: load: list with load data, in global orientation
         return: adds q1 and q2 to the beam object, where q1 is the normal
-            load working on N1, and q2 for N2
+            load working on NODE1, and q2 for NODE2
             Note:   positive load is difined as upwards(positive z) in the beams local orientation
         '''
         if(self.orientation == 0):
@@ -155,6 +157,7 @@ class Beam:
     def calculateFIM(self):
         '''
         Calculates FIM for beams affected by distributed loads
+        Also adds FIM to the nodes affected
         Based on table found in "TMR4167 Marin teknikk 2 – Konstruksjoner - Del 1", page 281
         '''
         if(self.q1 == self.q2):
@@ -165,7 +168,9 @@ class Beam:
             self.m2 = -(1/12)*self.q1*(self.length)**2 - (1/20)*self.q2*(self.length)**2 
         else:
             self.m1 = (1/12)*self.q1*(self.length)**2 + (1/20)*self.q2*(self.length)**2
-            self.m2 = -(1/12)*self.q1*(self.length)**2 - (1/30)*self.q2*(self.length)**2 
+            self.m2 = -(1/12)*self.q1*(self.length)**2 - (1/30)*self.q2*(self.length)**2
+        self.node1.M += self.m1
+        self.node2.M += self.m2
             
             
     #TODO
@@ -177,6 +182,8 @@ class Node:
     It can also be used to give displacements. But so far I dont completely understand
     how to make the element matrises. When these materices are created we can use node objects to
     add displacements in the global coordinate system.
+    N, V, and M is here: (in norwegian) fastinnspenningsaksialkraft, fastinnspenningsskjerkraft og fastinnspenningsmoment)
+    We can use this to create a R-vector of all the FI-loads
     '''
     def __init__(self, x, z, u, w, ø):
         self.x = x
@@ -184,6 +191,9 @@ class Node:
         self.u = u
         self.w = w
         self.ø = ø
+        self.N = 0
+        self.V = 0
+        self.M = 0
 
     def giveNumber(self,nodeNumber):
         '''
@@ -192,17 +202,4 @@ class Node:
         :return: applies number to node.
         '''
         self.number = nodeNumber
-
-    def giveDisplacement(self, u, w, theta):
-        '''
-        Not sure exactly how to use this yet. This gives a virtual displacement to the node
-        in the global coordinate system.
-        :param u: x displacement
-        :param w: z displacement
-        :param theta: rotational displacement (clockwise positive)
-        :return: applies displacements to node.
-        '''
-        self.u = u
-        self.w = w
-        self.theta = theta
 
