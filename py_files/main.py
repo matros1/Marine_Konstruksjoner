@@ -24,14 +24,17 @@ def main():
     connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
 
     #Makes the Resulting Load Vector
-    makeResultingLoadVector(nodesObjectList)
+    R = makeResultingLoadVector(nodesObjectList)
 
-    #SystemStivhetsMatrise med bare 0-er
+    #Global stiffness matrix with only zeros
     SSM = getGlobalStiffnessMatrixOfZeros(len(nodesObjectList)*3)
+
+
 
     #Plots. Here we use the imported library structure visualization to visualize our frame.
     plot(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray)
     #TODO. Make a visualization of deformations.
+
 
     return 0
 
