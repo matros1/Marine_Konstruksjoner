@@ -175,12 +175,12 @@ class Beam:
             [0,         0,          0,  0,          0,          1]])
 
         T_transponent = np.array([
-            [np.cos(a), np.sin(a), 0,  0,          0,          0],
-            [-np.sin(a), np.cos(a),  0,  0,          0,          0],
-            [0,         0,          1,  0,          0,          0],
-            [0,         0,          0,  np.cos(a),  np.sin(a), 0],
-            [0,         0,          0,  -np.sin(a),  np.cos(a),  0],
-            [0,         0,          0,  0,          0,          1]])
+            [np.cos(a),     np.sin(a),  0,  0,          0,          0],
+            [-np.sin(a),    np.cos(a),  0,  0,          0,          0],
+            [0,             0,          1,  0,          0,          0],
+            [0,             0,          0,  np.cos(a),  np.sin(a),  0],
+            [0,             0,          0,  -np.sin(a), np.cos(a),  0],
+            [0,             0,          0,  0,          0,          1]])
         self.transformedStiffnessMatrix = list(np.matmul(T, np.matmul(self.localStiffnessMatrix, T_transponent)))
 
     def addDistributedNormalLoad(self, load):
@@ -203,25 +203,23 @@ class Beam:
 
     def calculateFIM(self):
         '''
-        Calculates FIM for beams affected by distributed loads
-        Adds FIM to the nodes affected
+        Calculates FIM  and sheer for beams affected by distributed loads
+        Adds FIM and sheer to the nodes affected
         Based on table found in "TMR4167 Marin teknikk 2 – Konstruksjoner - Del 1", page 281
         '''
-        self.node1.M += (1/20)*self.q1*(self.length)**2 + (1/30)*self.q2*(self.length)**2
-        self.node2.M += -(1/30)*self.q1*(self.length)**2 - (1/20)*self.q2*(self.length)**2
+        m1 = (1/20)*self.q1*(self.length)**2 + (1/30)*self.q2*(self.length)**2
+        m2 = -(1/30)*self.q1*(self.length)**2 - (1/20)*self.q2*(self.length)**2
 
-    #TODO
-    """ def calculateFISheer(self):
-        '''
-        Calculates Fixed Clamping Sheerforces from distributed loads
-        '''
-        self.node1.Fx += np.sin(self.orientation)*(something)
-        self.node1.Fy += np.cos(self.orientation)*(something)
+        self.node1.M += m1
+        self.node2.M += m2
 
-        self.node2.Fx += np.sin(self.orientation)*(something)
-        self.node2.Fy += np.cos(self.orientation)*(something) 
-    """
+        v2 = (m1 + m2 - (self.q1*self.length**2)/6 - (self.q2*self.length**2)/3)/self.length
+        v1 = (self.length/2)*(self.q1 + self.q2) - v2
 
+        self.node1.Fx += v1*np.sin(self.orientation)
+        self.node1.Fz += v1*np.cos(self.orientation)
+        self.node2.Fx += v2*np.sin(self.orientation)
+        self.node2.Fz += v2*np.cos(self.orientation)
 class Node:
     '''
     This class is mostly used to create beams, but also to store

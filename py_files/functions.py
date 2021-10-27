@@ -90,9 +90,8 @@ def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloa
             if (beamsObjectList[j].number == beamloadArray[i][0]):
                 beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i])
                 beamsObjectList[j].calculateFIM()
-                # beamsObjectList[j].calculateFISheer(), see classes.py
     return beamsObjectList
-
+    
 
 def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
     '''
