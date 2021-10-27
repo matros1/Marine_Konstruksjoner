@@ -34,7 +34,7 @@ def main():
     #Plots. Here we use the imported library structure visualization to visualize our frame.
     plot(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray)
     #TODO. Make a visualization of deformations.
-
+    #dette er en liten endring
 
     return 0
 
