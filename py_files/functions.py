@@ -5,6 +5,7 @@ from classes import *
 #TODO: create the element matrices. For this we actually have to understand some
 #course theory, not just python coding ;)
 
+#Testing
 
 def getMomentFromTriangleLoad(q1,q2,L):
     '''
