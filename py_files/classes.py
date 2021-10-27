@@ -121,12 +121,12 @@ class Beam:
             [0,         0,          0,  0,          0,          1]])
 
         T_transponent = np.array([
-            [(10*np.cos(a)+5*np.cos(3*a)+np.cos(5*a))/(8*np.cos(2*a)+2*np.cos(4*a)+6),  (np.sin(a)+np.sin(3*a))/(2*np.cos(2*a)+2),  0,  0,                                                              0,                              0],
-            [(-np.sin(a)-np.sin(3*a))/(2*np.cos(2*a)+2),                                np.cos(a),                                  0,  0,                                                              0,                              0],
-            [0,                                                                         0,                                          1,  0,                                                              0,                              0],
-            [0,                                                                         0,                                          0,  (4*np.cos(2*a)+np.cos(4*a)+3)/(6*np.cos(a)+2*np.cos(3*a)),      np.sin(2*a)/(2*np.cos(a)),      0],
-            [0,                                                                         0,                                          0,  -np.sin(2*a)/(2*np.cos(a)),                                     (np.cos(2*a)+1)/(2*np.cos(a)),  0],
-            [0,                                                                         0,                                          0,  0,                                                              0,                              1]])
+            [np.cos(a),   np.sin(a),  0,  0,          0,          0],
+            [-np.sin(a),  np.cos(a),  0,  0,          0,          0],
+            [0,           0,          1,  0,          0,          0],
+            [0,           0,          0,  np.cos(a),  np.sin(a),  0],
+            [0,           0,          0,  -np.sin(a), np.cos(a),  0],
+            [0,           0,          0,  0,          0,          1]])
 
         self.transformedStiffnessMatrix = np.matmul(T, np.matmul(self.localStiffnessMatrix, T_transponent))
 
