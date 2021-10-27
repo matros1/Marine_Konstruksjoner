@@ -7,7 +7,6 @@ from structure_visualization import *
 
 # This file reads in all subfiles.
 # This is the command room, and here we controll the program.
-#
 
 
 def main():
@@ -26,11 +25,8 @@ def main():
 
 
 
-
-
-
     # Global stiffness matrix with only zeros
-    # SSM = getGlobalStiffnessMatrixOfZeros(len(nodesObjectList) * 3)
+    makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList)
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
     # plot(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray)

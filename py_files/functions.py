@@ -8,40 +8,13 @@ from importedLibraries import *
 
 # Testing
 
-def getMomentFromTriangleLoad(q1, q2, L):
-    '''
-    Returns a array of the moment distribution along a beam from a triangle pluss rectangle load.
-    This can also ofcorse return moment at L/2 as required from the project description.
-    :param q1: Initial load
-    :param q2: Final load (larger than or equal to q1)
-    :param L: length of beam
-    :return: a moment distribution list.
-    '''
-
-    N = 100
-    x = np.linspace(0, L, N + 1)
-    dx = L / N
-    momentList = [0] * (N + 1)
-    q_const = np.abs(min(q1, q2))
-
-    for i in range(N + 1):
-        # Constant load
-        momentList[i] += q_const * (i * dx) * (L - i * dx) / 2
-        # Triangle load
-        if q1 >= q2:
-            momentList[i] += (q1 - q2) * (i * dx) / (6 * L) * (2 * L * L - 3 * L * (i * dx) + (i * dx) ** 2)
-        else:
-            momentList[i] += (q2 - q1) * (L - i * dx) / (6 * L) * (2 * L * L - 3 * L * (L - i * dx) + (L - i * dx) ** 2)
-
-    return np.array(momentList), x
-
 
 def initializeNodesAndBeamsList(nodeArray, beamArray):
     nodesObjectList = []
     beamsObjectList = []
 
     for i in range(len(nodeArray)):
-        nodesObjectList.append(Node(nodeArray[i][0], nodeArray[i][1],0,0,0))
+        nodesObjectList.append(Node(nodeArray[i][0], nodeArray[i][1], 0, 0, 0))
 
     for j in range(len(beamArray)):
         N1 = nodesObjectList[int(beamArray[j][0]) - 1]
@@ -100,6 +73,7 @@ def giveLocalStiffnessMatrixToBeamsInGlobalCoordinates(beamsObjectList):
         beamsObjectList[i].makeTransformedStiffnessMatrix()
     return beamsObjectList
 
+
 def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray):
     '''
     Connects the distributed loads to the beam objects,
@@ -133,7 +107,8 @@ def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
     return nodesObjectList
 
 
-def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary):
+def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary,
+                                 IPELibrary):
     '''
     Takes one np array of beams and one of nodes a turns them into a list of node and beam objects.
     :param NODE: np array of all nodes
@@ -171,7 +146,32 @@ def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadAr
     return nodesObjectList, beamsObjectList
 
 
+def getMomentFromTriangleLoad(q1, q2, L):
+    '''
+    Returns a array of the moment distribution along a beam from a triangle pluss rectangle load.
+    This can also ofcorse return moment at L/2 as required from the project description.
+    :param q1: Initial load
+    :param q2: Final load (larger than or equal to q1)
+    :param L: length of beam
+    :return: a moment distribution list.
+    '''
 
+    N = 100
+    x = np.linspace(0, L, N + 1)
+    dx = L / N
+    momentList = [0] * (N + 1)
+    q_const = np.abs(min(q1, q2))
+
+    for i in range(N + 1):
+        # Constant load
+        momentList[i] += q_const * (i * dx) * (L - i * dx) / 2
+        # Triangle load
+        if q1 >= q2:
+            momentList[i] += (q1 - q2) * (i * dx) / (6 * L) * (2 * L * L - 3 * L * (i * dx) + (i * dx) ** 2)
+        else:
+            momentList[i] += (q2 - q1) * (L - i * dx) / (6 * L) * (2 * L * L - 3 * L * (L - i * dx) + (L - i * dx) ** 2)
+
+    return np.array(momentList), x
 
 
 def makeResultingLoadVector(nodesObjectList):
@@ -188,3 +188,22 @@ def makeResultingLoadVector(nodesObjectList):
         R.append(-nodesObjectList[i].Fz)
         R.append(-nodesObjectList[i].M)
     return np.array(R)
+
+
+def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
+    n = len(nodesObjectList)
+    M = np.zeros((3*n, 3*n))
+
+    for beam in beamsObjectList:
+        n1 = beam.node1.number - 1
+        n2 = beam.node2.number - 1
+        K = beam.transformedStiffnessMatrix
+        for i in range(3):
+            for j in range(3):
+                M[n1 * 3 + i][n1 * 3 + j] += K[i][j]
+                M[n2 * 3 + i][n2 * 3 + j] += K[3 + i][3 + j]
+                M[n1 * 3 + i][n2 * 3 + j] += K[i][3 + j]
+                M[n2 * 3 + i][n1 * 3 + j] += K[3 + i][j]
+
+    print(M)
+    return M

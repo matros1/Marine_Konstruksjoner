@@ -181,7 +181,7 @@ class Beam:
             [0,         0,          0,  np.cos(a),  np.sin(a), 0],
             [0,         0,          0,  -np.sin(a),  np.cos(a),  0],
             [0,         0,          0,  0,          0,          1]])
-        self.transformedStiffnessMatrix = np.matmul(T, np.matmul(self.localStiffnessMatrix, T_transponent))
+        self.transformedStiffnessMatrix = list(np.matmul(T, np.matmul(self.localStiffnessMatrix, T_transponent)))
 
     def addDistributedNormalLoad(self, load):
         '''
