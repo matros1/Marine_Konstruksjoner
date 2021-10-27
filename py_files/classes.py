@@ -30,8 +30,8 @@ class Beam:
         :param ratioAir: how much of the radius is air (thin walled pipe)
         :return: applies area and moment of inertia to the beam
         '''
-        I = np.pi / 4 * (r * (1 - ratioAir)) ** 2
-        A = I * 4
+        I = np.pi / 4 * (r**4 - ratioAir**4)
+        A = np.pi * (r**2 - ratioAir**2)
         self.area = A
         self.momentOfInertiaStrong = I
         self.momentOfInertiaWeak = I
@@ -52,12 +52,14 @@ class Beam:
         Abot = w_bot*t_bot
         Amid = (H-t_top-t_bot)*w_mid
 
+        zc = (Atop*(H - t_top/2) + Amid*((H-t_top-t_bot)/2 + t_bot) + Abot*t_bot/2)/(Atop + Amid + Abot)
+
         Itop = w_top * t_top**3 / 12
         Ibot = w_bot * t_bot ** 3 / 12
         Imid = (H-t_top-t_bot)**3 * w_mid / 12
 
         area = Atop + Abot + Amid
-        momInertiaStrong = Itop + Ibot + Imid + Atop*(H/2 - t_top/2)**2 + Abot*(H/2 - t_bot/2)**2
+        momInertiaStrong = Itop + Ibot + Imid + Atop*(H - t_top/2 - zc)**2 + Amid*((H-t_top-t_bot)/2 + t_bot - zc)**2 + Abot*(t_bot/2 - zc)**2
         momInertiaWeak = (w_top**3*t_top + w_mid**3 * (H-t_top-t_bot) + w_bot**3 * t_bot)/12
 
         self.area = area
