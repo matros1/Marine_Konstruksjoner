@@ -78,11 +78,11 @@ def plot_structure_def(ax, punkt, elem, numbers, index_start, r):
     # The bool (0 or 1) 'numbers' decides if node and element numbers are plotted or not
 
     #Scale
-    r = r*8
+    r = r*30
 
     # Change input to the correct format
     nodes = np.array(punkt[:, 0:2], copy = 1, dtype = int)
-    el_nod = np.array(elem[:, 0:2], copy=1, dtype=int) + 1
+    el_nod = np.array(elem[:, 0:2], copy=1, dtype=int)
     nod_dof = np.arange(1, nodes.shape[0] + 1, 1, dtype=int)
 
     if numbers == 1:
@@ -90,7 +90,7 @@ def plot_structure_def(ax, punkt, elem, numbers, index_start, r):
         for inod in range(0, nodes.shape[0]):
             ax.text(nodes[inod, 0], nodes[inod, 1], str(inod + index_start), color = 'red', fontsize = 16)
 
-    elNodToNodesKonstant = 2
+    elNodToNodesKonstant = 1
 
     for iel in range(0, el_nod.shape[0]):
         delta_x = nodes[el_nod[iel, 1] - elNodToNodesKonstant, 0] - nodes[el_nod[iel, 0] - elNodToNodesKonstant, 0]
@@ -104,7 +104,7 @@ def plot_structure_def(ax, punkt, elem, numbers, index_start, r):
         phi = np.zeros((2, 1))
         for inod in range(0, 2):
             if nod_dof[el_nod[iel, inod] - elNodToNodesKonstant] > 0:
-                phi[inod] = r[nod_dof[el_nod[iel, inod] - elNodToNodesKonstant] - 1]
+                phi[inod] = r[(el_nod[iel, inod] - elNodToNodesKonstant)*3 + 2]
         x = np.array([0, L])
         z = np.array([0, 0])
         xx = np.arange(0, 1.01, 0.01)*L

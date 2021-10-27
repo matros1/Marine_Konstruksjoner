@@ -21,7 +21,7 @@ def plot(NODE, BEAM, r):
 
     fig_init, ax_init, fig_def, ax_def = setup_plots()
 
-    plot_structure(ax_init, NODE, BEAM, 1, indexStart)
+    plot_structure(ax_init, NODE, BEAM, 0, indexStart)
 
     plot_structure_def(ax_def, NODE, BEAM, 0, indexStart, r)
 
