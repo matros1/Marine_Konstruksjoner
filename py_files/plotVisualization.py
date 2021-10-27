@@ -6,7 +6,7 @@ This subfile controlls plotting. It is dependent on the given code from data stu
 TODO: Later on Hugo will use the nodesObjectList and beamsObjectList to plot. 
 '''
 
-def plot(NODE, BEAM, MATERIAL, NODELOAD, BEAMLOAD):
+def plot(NODE, BEAM, r):
     '''
     Makes a plot using given structure visualization plots.
     :param NODE: Array of nodes
@@ -22,6 +22,8 @@ def plot(NODE, BEAM, MATERIAL, NODELOAD, BEAMLOAD):
     fig_init, ax_init, fig_def, ax_def = setup_plots()
 
     plot_structure(ax_init, NODE, BEAM, 1, indexStart)
+
+    plot_structure_def(ax_def, NODE, BEAM, 0, indexStart, r)
 
     plt.show()
 

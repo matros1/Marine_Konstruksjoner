@@ -161,9 +161,7 @@ class Beam:
         '''
         Transforms the beams local stiffnessmatrix to the global orientation, 
         making it ready to be put in the global system-stiffnessmatrix.
-        :return: applies the stiffnessmatrix in the global orientation to the beam
-
-        NB!! Denne må testes
+        :return: applies the stiffnessmatrix in the global orientation to the beams
         '''
         a = self.orientation
         T = np.array([
@@ -189,7 +187,7 @@ class Beam:
         param: load: list with load data, in global orientation
         return: adds q1 and q2 to the beam object, where q1 is the normal
             load working on NODE1, and q2 for NODE2
-            Note:   positive load is difined as upwards(positive z) in the beams local orientation
+            Note:   positive load is defined as upwards(positive z) in the beams local orientation
         '''
         if(self.orientation == 0):
             self.q1 = load[2]

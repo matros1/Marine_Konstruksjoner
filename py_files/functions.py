@@ -3,18 +3,13 @@ from importedLibraries import *
 
 
 # Funksjoner
-# TODO: create the element matrices. For this we actually have to understand some
-# course theory, not just python coding ;)
-
-# Testing
-
 
 def initializeNodesAndBeamsList(nodeArray, beamArray):
     nodesObjectList = []
     beamsObjectList = []
 
     for i in range(len(nodeArray)):
-        nodesObjectList.append(Node(nodeArray[i][0], nodeArray[i][1], 0, 0, 0))
+        nodesObjectList.append(Node(nodeArray[i][0], nodeArray[i][1], nodeArray[i][2], nodeArray[i][3], nodeArray[i][4]))
 
     for j in range(len(beamArray)):
         N1 = nodesObjectList[int(beamArray[j][0]) - 1]
@@ -178,21 +173,21 @@ def makeResultingLoadVector(nodesObjectList):
     Makes list of Fixed Clamping Forces and Vectors
     K*r = R
     K: Global Stiffness Matrix
-    r: Deformation vector
+    r: Displacement vector
     R: Loadvector
     '''
     R = []
     for i in range(len(nodesObjectList)):
-        R.append(-nodesObjectList[i].Fx)
-        R.append(-nodesObjectList[i].Fz)
-        R.append(-nodesObjectList[i].M)
+        R.append(-nodesObjectList[i].Fx)    # u
+        R.append(-nodesObjectList[i].Fz)    # w
+        R.append(-nodesObjectList[i].M)     # ø
     return np.array(R)
 
 
 def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
-    n = len(nodesObjectList)
-    M = np.zeros((3*n, 3*n))
+    M = np.zeros((3*len(nodesObjectList), 3*len(nodesObjectList)))
 
+    #Make stiffnessmatrix
     for beam in beamsObjectList:
         n1 = beam.node1.number - 1
         n2 = beam.node2.number - 1
@@ -204,5 +199,24 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
                 M[n1 * 3 + i][n2 * 3 + j] += K[i][3 + j]
                 M[n2 * 3 + i][n1 * 3 + j] += K[3 + i][j]
 
+    #Account for fixing point conditions
+    for n,node in enumerate(nodesObjectList):
+        for k in range(3):
+            if k == 0:
+                displacement = node.u
+            elif k == 1:
+                displacement = node.w
+            elif k == 2:
+                displacement = node.ø
+
+            if displacement == 1: # Do nothing
+                pass
+            elif displacement == 2: # Multiply diagonal with 10^6
+                M[n * 3 + k][n *3 + k] = M[n * 3 + k][n * 3 + k]*10**6
+            elif displacement == 0: # Make diagonal 1, rest of row/collumn 0
+                for l in range(len(nodesObjectList)):
+                    M[n * 3 + k][l] = 0
+                    M[l][n * 3 + k] = 0
+                M[n + k][n + k] = 1
     print(M)
     return M

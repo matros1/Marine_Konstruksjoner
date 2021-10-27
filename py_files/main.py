@@ -15,23 +15,24 @@ def main():
     nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readAll()
 
     # Makes lists of node objects and beam objects from nodes and beams np arrays
-    nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray,
-                                                                    beamArray, materialArray, nodeloadArray, beamloadArray,pipeLibrary, IPELibrary)
-
-
+    nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray,beamArray, materialArray, nodeloadArray, beamloadArray,pipeLibrary, IPELibrary)
 
     # Makes the Resulting Load Vector
     R = makeResultingLoadVector(nodesObjectList)
 
-
-
     # Global stiffness matrix with only zeros
-    makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList)
+    K = makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList)
+
+    # Calculate the displacement vector
+    r = np.linalg.solve(K,R)
+    print(r)
+    
+
+
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
-    # plot(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray)
-    # TODO. Make a visualization of deformations.
-    # dette er en liten endring
+    #the code runs, but deformations look too small or non existent
+    plot(nodeArray,beamArray, r)
 
     return 0
 
