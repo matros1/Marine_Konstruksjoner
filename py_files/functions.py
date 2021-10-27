@@ -6,27 +6,6 @@ from classes import *
 #course theory, not just python coding ;)
 
 
-def getGlobalStiffnessMatrixOfZeros(n):
-    '''
-    Makes an n by n array of zeros.
-    :return: n by n zero matrix
-    '''
-    SSM = []
-    for i in range(n):
-        SSM.append(np.zeros(n))
-    return np.array(SSM)
-
-def createElementStiffnessMatrixOfZeroes():
-    '''
-    Makes and returns an element stiffness matrix.
-    :return:
-    '''
-    K = []
-    for i in range(6):
-        K.append(np.zeros(6))
-    K = np.array(K)
-    return K
-
 def getMomentFromTriangleLoad(q1,q2,L):
     '''
     Returns a array of the moment distribution along a beam from a triangle pluss rectangle load.
