@@ -32,25 +32,32 @@ def readAll():
     Reads nodedata, beamdata, materialdata, nodeloaddata and beamloaddata to np array.
     :return: np array of nodedata, beamdata, materialdata, nodeloaddata and beamloaddata.
     '''
-    NODE = readCSV_float("txt_files/NodeData.txt")
+    NODE = readCSV_float("NodeData.txt")
     # x, z, u, w, theta
-    # På u,w,theta er 1 = "Denne er ukjent, må tas med i matrisen", 0 = "Denne skal være 0"
+    # På u,w,theta er 1="Denne er ukjent, må tas med i matrisen", 0="Denne er 0"
 
-    BEAM = readCSV_int("txt_files/BeamData.txt")
+    BEAM = readCSV_int("BeamData.txt")
     # N1, N2, M, G
     # N1-Node lengst til venstre
     # N2-Node lengst til høyre
     #  M-Materiale, 1=stål, 2=aluminium
-    #  G-Tverrsnittsgeometri
+    #  Geometri. 1 = pipe, 2 = IPE
+    #  Geometri utvalgt fra biblioteket
 
-    MATERIAL = readCSV_float("txt_files/MaterialData.txt")
-    # E-modul, f_y, tverrkontraksjonstallet
+    MATERIAL = readCSV_float("MaterialData.txt")
+    # E-modul, flytspenning, tverrkontraksjonstallet
     # 1 er stål og 2 er aluminium
 
-    NODELOAD = readCSV_int("txt_files/NodeLoadData.txt")
-    # Nodenr, Fx, Fz, My
+    NODELOAD = readCSV_int("NodeLoadData.txt")
+    # Nodenr, Fx, Fy, Fz, Mx, My, Mz
 
-    BEAMLOAD = readCSV_int("txt_files/BeamLoadData.txt")
-    #Bjelkenr, q1x, q1y, q2x, q2y
+    BEAMLOAD = readCSV_int("BeamLoadData.txt")
 
-    return NODE,BEAM,MATERIAL,NODELOAD,BEAMLOAD
+
+    PipeData = readCSV_float("PipeData")
+    # radius, ratio air
+
+    IPEData = readCSV_float("IPEData")
+    #total height, width top, bottom, mid, thickness topp, bot
+
+    return NODE,BEAM,MATERIAL,NODELOAD,BEAMLOAD, PipeData, IPEData

@@ -103,6 +103,60 @@ class Beam:
         '''
         self.number = beamNumber
 
+    def makeStiffness(self, E):
+        '''
+        Implements E modulus and appends stiffness to beam. This requires that moment of inertia
+        already is made.
+        :param E:
+        :return:
+        '''
+        self.E = E
+        self.stiffnessStrongAxis = self.momentOfInertiaStrong * self.E
+        self.stiffnessWeakAxis = self.momentOfInertiaWeak * self.E
+
+    def makeLocalStiffnessMatrix(self):
+        '''
+        Makes an local stiffness matrix. Require predefined area, moment of inertia and E modulus to run.
+        :return: Appends local stiffness matrix to self.
+        '''
+        localStiffnessMatrix = np.zeros((6, 6))
+
+        #Uses local variables to make variables that simplify later calculations
+        EA_L = self.area * self.E / self.length
+        EI_L = self.momentOfInertiaStrong * self.E / self.length
+        EI_L2 = self.momentOfInertiaStrong * self.E / (self.length ** 2)
+        EI_L3 = self.momentOfInertiaStrong * self.E / (self.length ** 3)
+
+        #All E*A/L dependent matrix elements
+        localStiffnessMatrix[0][0] = EA_L
+        localStiffnessMatrix[3][3] = EA_L
+        localStiffnessMatrix[0][3] = -1 * EA_L
+        localStiffnessMatrix[3][0] = -1 * EA_L
+
+        # All E*I/L dependent matrix elements
+        localStiffnessMatrix[2][2] = 4*EI_L
+        localStiffnessMatrix[5][5] = 4*EI_L
+        localStiffnessMatrix[5][2] = 2*EI_L
+        localStiffnessMatrix[2][5] = 2*EI_L
+
+        # All E*A/L^2 dependent matrix elements
+        localStiffnessMatrix[4][5] = 6*EI_L2
+        localStiffnessMatrix[5][4] = 6*EI_L2
+        localStiffnessMatrix[1][5] = -6*EI_L2
+        localStiffnessMatrix[5][1] = -6*EI_L2
+        localStiffnessMatrix[4][2] = 6*EI_L2
+        localStiffnessMatrix[2][4] = 6*EI_L2
+        localStiffnessMatrix[1][2] = -6*EI_L2
+        localStiffnessMatrix[2][1] = -6*EI_L2
+
+        # All E*A/L^3 dependent matrix elements
+        localStiffnessMatrix[1][1] = 12 * EI_L3
+        localStiffnessMatrix[4][4] = 12 * EI_L3
+        localStiffnessMatrix[1][4] = -1 * 12 * EI_L3
+        localStiffnessMatrix[4][1] = -1 * 12 * EI_L3
+
+        self.localStiffnessMatrix = localStiffnessMatrix
+
     def makeTransformedStiffnessMatrix(self):
         '''
         Transforms the beams local stiffnessmatrix to the global orientation, 
@@ -121,13 +175,12 @@ class Beam:
             [0,         0,          0,  0,          0,          1]])
 
         T_transponent = np.array([
-            [np.cos(a),   np.sin(a),  0,  0,          0,          0],
-            [-np.sin(a),  np.cos(a),  0,  0,          0,          0],
-            [0,           0,          1,  0,          0,          0],
-            [0,           0,          0,  np.cos(a),  np.sin(a),  0],
-            [0,           0,          0,  -np.sin(a), np.cos(a),  0],
-            [0,           0,          0,  0,          0,          1]])
-
+            [np.cos(a), np.sin(a), 0,  0,          0,          0],
+            [-np.sin(a), np.cos(a),  0,  0,          0,          0],
+            [0,         0,          1,  0,          0,          0],
+            [0,         0,          0,  np.cos(a),  np.sin(a), 0],
+            [0,         0,          0,  -np.sin(a),  np.cos(a),  0],
+            [0,         0,          0,  0,          0,          1]])
         self.transformedStiffnessMatrix = np.matmul(T, np.matmul(self.localStiffnessMatrix, T_transponent))
 
     def addDistributedNormalLoad(self, load):
@@ -150,24 +203,24 @@ class Beam:
 
     def calculateFIM(self):
         '''
-        Calculates FIM  and sheer for beams affected by distributed loads
-        Adds FIM and sheer to the nodes affected
+        Calculates FIM for beams affected by distributed loads
+        Adds FIM to the nodes affected
         Based on table found in "TMR4167 Marin teknikk 2 – Konstruksjoner - Del 1", page 281
         '''
-        m1 = (1/20)*self.q1*(self.length)**2 + (1/30)*self.q2*(self.length)**2
-        m2 = -(1/30)*self.q1*(self.length)**2 - (1/20)*self.q2*(self.length)**2
+        self.node1.M += (1/20)*self.q1*(self.length)**2 + (1/30)*self.q2*(self.length)**2
+        self.node2.M += -(1/30)*self.q1*(self.length)**2 - (1/20)*self.q2*(self.length)**2
 
-        self.node1.M += m1
-        self.node2.M += m2
+    #TODO
+    """ def calculateFISheer(self):
+        '''
+        Calculates Fixed Clamping Sheerforces from distributed loads
+        '''
+        self.node1.Fx += np.sin(self.orientation)*(something)
+        self.node1.Fy += np.cos(self.orientation)*(something)
 
-        v2 = (m1 + m2 - (self.q1*self.length**2)/6 - (self.q2*self.length**2)/3)/self.length
-        v1 = (self.length/2)*(self.q1 + self.q2) - v2
-
-        self.node1.Fx += v1*np.sin(self.orientation)
-        self.node1.Fz += v1*np.cos(self.orientation)
-
-        self.node2.Fx += v2*np.sin(self.orientation)
-        self.node2.Fz += v2*np.cos(self.orientation)
+        self.node2.Fx += np.sin(self.orientation)*(something)
+        self.node2.Fy += np.cos(self.orientation)*(something) 
+    """
 
 class Node:
     '''
