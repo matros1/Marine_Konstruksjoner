@@ -11,8 +11,7 @@ from structure_visualization import *
 
 def main():
     # Reads some files and makes np arrays
-    # Reads some files and makes np arrays
-    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readAll()
+    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readINputFile("InputDataJacket.txt")
 
     # Makes lists of node objects and beam objects from nodes and beams np arrays
     nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray,beamArray, materialArray, nodeloadArray, beamloadArray,pipeLibrary, IPELibrary)

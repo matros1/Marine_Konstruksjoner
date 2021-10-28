@@ -24,12 +24,12 @@ def makeBeamsGeometry(beamList, beamsObjectList, pipeLibrary, IPELibrary):
     TempBeamsList = []
     for beam in beamsObjectList:
         if beamList[i][3] == 1:  # If beam geometry is IPE
-            k = beamList[i][4] - 1
+            k = int(beamList[i][4] - 1)
             beam.makeIPE(IPELibrary[k][0], IPELibrary[k][1], IPELibrary[k][2],
                          IPELibrary[k][3], IPELibrary[k][4], IPELibrary[k][5])
             # hight, w top, w bot, w mid, t top, t bot
         elif beamList[i][3] == 2:  # If beam geometry is pipe
-            k = beamList[i][4] - 1
+            k = int(beamList[i][4] - 1)
             beam.makePipe(pipeLibrary[k][0], pipeLibrary[k][1])
             # arguments: radius, ratio air
 
@@ -43,7 +43,7 @@ def giveEmodulToBeams(beamsObjectList, materialArray, beamData):
     i = 0
     TempBeamsList = []
     for beam in beamsObjectList:
-        k = beamData[i][2] - 1
+        k = int(beamData[i][2] - 1)
         beam.makeStiffness(materialArray[k][0])
         TempBeamsList.append(beam)
         i += 1
