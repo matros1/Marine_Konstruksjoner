@@ -73,9 +73,7 @@ def readINputFile(filepath):
     NODE, BEAM, MATERIAL, NODELOAD, BEAMLOAD, PIPE, IPE =[],[],[],[],[],[],[]
     for i, line in enumerate(lineList):
         line = line.split(',')
-        for element in line:
-            element = (str(element)).strip()
-        if str(line[0]) == "NODE":
+        if line[0] == "NODE":
             NODE.append(line[1:])
         elif line[0] == "BEAM":
             BEAM.append(line[1:])
@@ -89,9 +87,9 @@ def readINputFile(filepath):
             PIPE.append(line[1:])
         elif line[0] == "IPE":
             IPE.append(line[1:])
-        elif line[0] == "---":
+        elif line[0] == "---\n":
             pass
         else:
             print(f"Error reading line {i+1} in input file!")
-        f.close()
+    f.close()
     return np.array(NODE, dtype=float),np.array(BEAM,dtype=float),np.array(MATERIAL,dtype=float),np.array(NODELOAD,dtype=int),np.array(BEAMLOAD,dtype=int), np.array(PIPE,dtype=float), np.array(IPE,dtype=float)
