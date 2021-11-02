@@ -218,5 +218,28 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
                     M[n * 3 + k][l] = 0
                     M[l][n * 3 + k] = 0
                 M[n + k][n + k] = 1
-    print(M)
+    #print(M)
     return M
+
+def calculateBeamReactionForces(beamsObjectList, r):
+    for beam in beamsObjectList:
+        LocalDisplacements = np.zeros(6)
+        n1 = beam.node1.number - 1
+        n2 = beam.node2.number - 1
+        for i in range(3):
+            LocalDisplacements[i] = r[3 * n1 + i]
+            LocalDisplacements[3 + i] = r[3 * n2 + i]
+        LocalDisplacements = np.matmul(beam.T, LocalDisplacements)
+        beam.reactionForces = np.matmul(beam.localStiffnessMatrix, LocalDisplacements)
+        try:
+            m1 = (1/20)*beam.q1*(beam.length)**2 + (1/30)*beam.q2*(beam.length)**2
+            m2 = -(1/30)*beam.q1*(beam.length)**2 - (1/20)*beam.q2*(beam.length)**2
+
+            v2 = (m1 + m2 - (beam.q1*beam.length**2)/6 - (beam.q2*beam.length**2)/3)/beam.length
+            v1 = (beam.length/2)*(beam.q1 + beam.q2) - v2
+
+            beam.reactionForces -= np.array([0,v1,m1,0,v2,m2])
+        except AttributeError:
+            pass
+        except:
+            pass

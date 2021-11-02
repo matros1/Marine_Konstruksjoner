@@ -52,7 +52,7 @@ def readAll():
     # Nodenr, Fx, Fz, My
 
     BEAMLOAD = readCSV_int("py_files/BeamLoadData.txt")
-
+    # Beamnr, Fx1, Fz1, Fx2, Fz2
 
     PipeData = readCSV_float("py_files/PipeData")
     # radius, ratio air

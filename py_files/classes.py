@@ -164,7 +164,7 @@ class Beam:
         :return: applies the stiffnessmatrix in the global orientation to the beams
         '''
         a = self.orientation
-        T = np.array([
+        self.T = np.array([
             [np.cos(a), -np.sin(a), 0,  0,          0,          0],
             [np.sin(a), np.cos(a),  0,  0,          0,          0],
             [0,         0,          1,  0,          0,          0],
@@ -179,7 +179,7 @@ class Beam:
             [0,             0,          0,  np.cos(a),  np.sin(a),  0],
             [0,             0,          0,  -np.sin(a), np.cos(a),  0],
             [0,             0,          0,  0,          0,          1]])
-        self.transformedStiffnessMatrix = list(np.matmul(T, np.matmul(self.localStiffnessMatrix, T_transponent)))
+        self.transformedStiffnessMatrix = list(np.matmul(self.T, np.matmul(self.localStiffnessMatrix, T_transponent)))
 
     def addDistributedNormalLoad(self, load):
         '''
@@ -212,7 +212,7 @@ class Beam:
         self.node2.M += m2
 
         v2 = (m1 + m2 - (self.q1*self.length**2)/6 - (self.q2*self.length**2)/3)/self.length
-        v1 = (self.length/2)*(self.q1 + self.q2) - v2
+        v1 = -(self.length/2)*(self.q1 + self.q2) - v2
 
         self.node1.Fx += v1*np.sin(self.orientation)
         self.node1.Fz += v1*np.cos(self.orientation)
@@ -246,7 +246,7 @@ class Node:
         self.number = nodeNumber
 
     def addNodeLoad(self, nodeLoad):
-        self.Fx += nodeLoad[1]
-        self.Fz += nodeLoad[2]
-        self.M += nodeLoad[3]
+        self.Fx -= nodeLoad[1]
+        self.Fz -= nodeLoad[2]
+        self.M -= nodeLoad[3]
 

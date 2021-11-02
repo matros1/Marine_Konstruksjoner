@@ -11,7 +11,7 @@ from structure_visualization import *
 
 def main():
     # Reads some files and makes np arrays
-    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readINputFile("InputDataJacket.txt")
+    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readINputFile("InputDataPortalFrame.txt")
 
     # Makes lists of node objects and beam objects from nodes and beams np arrays
     nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray,beamArray, materialArray, nodeloadArray, beamloadArray,pipeLibrary, IPELibrary)
@@ -25,12 +25,11 @@ def main():
     # Calculate the displacement vector
     r = np.linalg.solve(K,R)
     print(r)
-    
 
-
+    #This does not work yet :(
+    #calculateBeamReactionForces(beamsObjectList, r)
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
-    #the code runs, but deformations look too small or non existent
     plot(nodeArray,beamArray, r)
 
     return 0
