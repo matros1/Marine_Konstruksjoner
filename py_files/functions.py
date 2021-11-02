@@ -185,6 +185,14 @@ def makeResultingLoadVector(nodesObjectList):
 
 
 def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
+    '''
+    Makes the global stiffnessmatrix by adding the transformed stiffnessmatrix for
+    each beam into the global, in position given by the nodes each beam is connected to.
+    We then account for fixing point coditions (opplagerbetingelser)
+    param beamsObjectList: List of all beam-objects
+    param nodesObjectList: List of all node-objects
+    return: Global stiffness-matrix
+    '''
     M = np.zeros((3*len(nodesObjectList), 3*len(nodesObjectList)))
 
     #Make stiffnessmatrix
@@ -222,6 +230,13 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
     return M
 
 def calculateBeamReactionForces(beamsObjectList, r):
+    '''
+    NB!! This works for FixedBeam, and partly works for PortalFrame
+    Calculates the beams reaction forces and moments
+    param beamsObjectList: List of all beam-objects
+    param r: vector containing all displacements
+    return: adds the reactionforces as member-variables to each beam and returns beamsObjectList
+    '''
     for beam in beamsObjectList:
         LocalDisplacements = np.zeros(6)
         n1 = beam.node1.number - 1
@@ -229,17 +244,29 @@ def calculateBeamReactionForces(beamsObjectList, r):
         for i in range(3):
             LocalDisplacements[i] = r[3 * n1 + i]
             LocalDisplacements[3 + i] = r[3 * n2 + i]
-        LocalDisplacements = np.matmul(beam.T, LocalDisplacements)
+        LocalDisplacements = np.matmul(beam.T_transponent, LocalDisplacements)
         beam.reactionForces = np.matmul(beam.localStiffnessMatrix, LocalDisplacements)
         try:
             m1 = (1/20)*beam.q1*(beam.length)**2 + (1/30)*beam.q2*(beam.length)**2
             m2 = -(1/30)*beam.q1*(beam.length)**2 - (1/20)*beam.q2*(beam.length)**2
 
             v2 = (m1 + m2 - (beam.q1*beam.length**2)/6 - (beam.q2*beam.length**2)/3)/beam.length
-            v1 = (beam.length/2)*(beam.q1 + beam.q2) - v2
+            v1 = -(beam.length/2)*(beam.q1 + beam.q2) - v2
 
-            beam.reactionForces -= np.array([0,v1,m1,0,v2,m2])
+            beam.reactionForces += np.array([0,v1,m1,0,v2,m2], dtype=float)
         except AttributeError:
             pass
-        except:
-            pass
+    return beamsObjectList
+
+
+def printReactionForces(beamsObjectList, n = 999999999):
+    '''
+    prints the Reactionforces for each beam
+    param beamsObjectList: list of all the beam-objects
+    param n: if n is given, the function will print forces of the n first beams, else, print for all beams
+    return: prints to console
+    '''
+    if n > len(beamsObjectList):
+        n = len(beamsObjectList)
+    for i in range(n):
+        print(beamsObjectList[i].reactionForces)

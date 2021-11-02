@@ -26,8 +26,9 @@ def main():
     r = np.linalg.solve(K,R)
     print(r)
 
-    #This does not work yet :(
-    #calculateBeamReactionForces(beamsObjectList, r)
+    #This works for FixedBeam, and partly works for PortalFrame
+    beamsObjectList = calculateBeamReactionForces(beamsObjectList, r)
+    printReactionForces(beamsObjectList, 3)
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
     plot(nodeArray,beamArray, r)
