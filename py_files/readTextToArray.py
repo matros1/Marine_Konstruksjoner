@@ -62,7 +62,7 @@ def readAll():
 
     return NODE,BEAM,MATERIAL,NODELOAD,BEAMLOAD, PipeData, IPEData
 
-def readINputFile(filepath):
+def readInputFile(filepath):
     '''
     Reads input file
     param filepath: filepath

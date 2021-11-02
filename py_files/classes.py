@@ -20,8 +20,8 @@ class Beam:
         self.node2 = NODE2
         self.x2 = NODE2.x
         self.z2 = NODE2.z
-        self.orientation = self.get_global_oriantation()
-        self.length = self.get_length()
+        self.orientation = self.getGlobalOrientation()
+        self.length = self.getLength()
 
     def makePipe(self, r, ratioAir):
         '''
@@ -66,7 +66,7 @@ class Beam:
         self.momentOfInertiaStrong = momInertiaStrong
         self.momentOfInertiaWeak = momInertiaWeak
 
-    def get_global_oriantation(self):
+    def getGlobalOrientation(self):
         '''
         Calculates the objects orientation and makes a variable called orientation.
         :return:
@@ -86,7 +86,7 @@ class Beam:
             theta_ref_global = 0
         return theta_ref_global
 
-    def get_length(self):
+    def getLength(self):
         '''
         Calculates the objects length. This function is used when initializing the beam.
         :return: length of beam.
@@ -246,6 +246,11 @@ class Node:
         self.number = nodeNumber
 
     def addNodeLoad(self, nodeLoad):
+        '''
+        Adds the nodeloads directly to the nodes
+        param nodeLoad: vector containing the nodeloads
+        -= because we want the reactionforces from the loads
+        '''
         self.Fx -= nodeLoad[1]
         self.Fz -= nodeLoad[2]
         self.M -= nodeLoad[3]

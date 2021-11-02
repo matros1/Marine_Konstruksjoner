@@ -5,6 +5,12 @@ from importedLibraries import *
 # Funksjoner
 
 def initializeNodesAndBeamsList(nodeArray, beamArray):
+    '''
+    Makes and initializes the object lists, for both beams and nodes
+    param nodeArray: matrix containing node-data from inputfile
+    param beamArray: matrix containing beam-data from inputfile
+    return: Objectlists for beams and nodes
+    '''
     nodesObjectList = []
     beamsObjectList = []
 
@@ -20,6 +26,14 @@ def initializeNodesAndBeamsList(nodeArray, beamArray):
 
 
 def makeBeamsGeometry(beamList, beamsObjectList, pipeLibrary, IPELibrary):
+    '''
+    Decides from the input file which geometry to add to each beam object
+    param beamList: matrix containing beam-data from input file
+    param beamsObjectList: list containing all beam-objects
+    param pipeLibrary: matrix containing pipe-data from input file
+    param IPELibrary: matrix containing IPE-data from input file
+    return: new beamsObjectList with added geometry added to the beams
+    '''
     i = 0
     TempBeamsList = []
     for beam in beamsObjectList:
@@ -63,7 +77,7 @@ def giveLocalStiffnessMatrixToBeamsLocalOrientation(beamsObjectList):
     return beamsObjectList
 
 
-def giveLocalStiffnessMatrixToBeamsInGlobalCoordinates(beamsObjectList):
+def giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList):
     for i in range(len(beamsObjectList)):
         beamsObjectList[i].makeTransformedStiffnessMatrix()
     return beamsObjectList
@@ -128,7 +142,7 @@ def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadAr
     beamsObjectList = giveLocalStiffnessMatrixToBeamsLocalOrientation(beamsObjectList)
 
     # Orients the local stiffness matrix to global coordinates
-    beamsObjectList = giveLocalStiffnessMatrixToBeamsInGlobalCoordinates(beamsObjectList)
+    beamsObjectList = giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList)
 
     # Connects the distributed loads to the beam objects,
     # and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
