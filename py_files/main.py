@@ -12,27 +12,31 @@ from structure_visualization import *
 def main():
     # Reads some files and makes np arrays
     # Reads some files and makes np arrays
-    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readAll()
+    nodeArray, beamArray, materialArray, nodeloadArray, beamdistributedloadArray, beamPointLoadArray, pipeLibrary, IPELibrary = readAll()
+
 
     # Makes lists of node objects and beam objects from nodes and beams np arrays
-    nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray,beamArray, materialArray, nodeloadArray, beamloadArray,pipeLibrary, IPELibrary)
+    nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadArray,
+                                                                    beamdistributedloadArray, beamPointLoadArray,
+                                                                    pipeLibrary, IPELibrary)
+
+
 
     # Makes the Resulting Load Vector
     R = makeResultingLoadVector(nodesObjectList)
 
-    # Global stiffness matrix with only zeros
+    # Global stiffness matrix
     K = makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList)
 
     # Calculate the displacement vector
-    r = np.linalg.solve(K,R)
-    print(r)
-    
+    r = np.linalg.solve(K, R)
+    print(r[8*3+2], r[9*3])
 
-
+    # TODO: All node are assumed to be fixed, which is not physical. Especially node 11.
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
-    #the code runs, but deformations look too small or non existent
-    plot(nodeArray,beamArray, r)
+    # the code runs, but deformations look too small or non existent
+    plot(nodeArray, beamArray, r)
 
     return 0
 

@@ -9,7 +9,8 @@ def initializeNodesAndBeamsList(nodeArray, beamArray):
     beamsObjectList = []
 
     for i in range(len(nodeArray)):
-        nodesObjectList.append(Node(nodeArray[i][0], nodeArray[i][1], nodeArray[i][2], nodeArray[i][3], nodeArray[i][4]))
+        nodesObjectList.append(
+            Node(nodeArray[i][0], nodeArray[i][1], nodeArray[i][2], nodeArray[i][3], nodeArray[i][4]))
 
     for j in range(len(beamArray)):
         N1 = nodesObjectList[int(beamArray[j][0]) - 1]
@@ -86,7 +87,28 @@ def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloa
                 beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i])
                 beamsObjectList[j].calculateFIM()
     return beamsObjectList
-    
+
+
+def connectPointLoadsToNodesAndCalculateFIM(beamsObjectList, beamPointloadArray, nodesObjectList):
+    for beam in beamsObjectList:
+        for i in range(len(beamPointloadArray)):
+            if beam.number == beamPointloadArray[i][0]:
+                P = beamPointloadArray[i][1]
+                dL = beamPointloadArray[i][2]
+                theta = beam.orientation
+                n1 = beam.node1.number
+                n2 = beam.node2.number
+                P1 = P * (1 - dL)
+                P2 = P * dL
+                # Fast clamping moment from 2 times statically indetermined beam.
+                M1 = -P * dL * (1 - dL) ** 2 / beam.length ** 2
+                M2 = P * dL ** 2 * (1 - dL) / beam.length ** 2
+                load1 = [0, P1 * np.cos(theta), P1 * np.sin(theta), M1]
+                load2 = [0, P2 * np.cos(theta), P2 * np.sin(theta), M2]
+                nodesObjectList[n1 - 1].addNodeLoad(load1)
+                nodesObjectList[n2 - 1].addNodeLoad(load2)
+    return nodesObjectList
+
 
 def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
     '''
@@ -101,8 +123,8 @@ def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
     return nodesObjectList
 
 
-def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary,
-                                 IPELibrary):
+def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadArray, beamDistributedloadArray,
+                                 beamPointloadArray, pipeLibrary, IPELibrary):
     '''
     Takes one np array of beams and one of nodes a turns them into a list of node and beam objects.
     :param NODE: np array of all nodes
@@ -132,10 +154,13 @@ def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadAr
 
     # Connects the distributed loads to the beam objects,
     # and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
-    connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray)
+    connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamDistributedloadArray)
 
     # Connects nodeloads to the nodes
-    connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
+    nodesObjectList = connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
+
+    # Calculates FIM in node1 and node2 of a beam given by beamPointloadArray and appends these to corresponding nodes.
+    nodesObjectList = connectPointLoadsToNodesAndCalculateFIM(beamsObjectList, beamPointloadArray, nodesObjectList)
 
     return nodesObjectList, beamsObjectList
 
@@ -178,16 +203,25 @@ def makeResultingLoadVector(nodesObjectList):
     '''
     R = []
     for i in range(len(nodesObjectList)):
-        R.append(-nodesObjectList[i].Fx)    # u
-        R.append(-nodesObjectList[i].Fz)    # w
-        R.append(-nodesObjectList[i].M)     # ø
+        R.append(-nodesObjectList[i].Fx)  # u
+        R.append(-nodesObjectList[i].Fz)  # w
+        R.append(-nodesObjectList[i].M)  # ø
     return np.array(R)
 
 
-def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
-    M = np.zeros((3*len(nodesObjectList), 3*len(nodesObjectList)))
+def addNode13Load(Fx, Fz, M, nodesObjectList, beamsObjectList):
+    nodesObjectList[8].Fx += Fx / 2
+    nodesObjectList[9].Fx += Fx / 2
+    nodesObjectList[8].Fz += Fz / 2
+    nodesObjectList[9].Fz += Fz / 2
+    nodesObjectList[8].M += Fz * beamsObjectList[8].length / 2
+    nodesObjectList[9].M -= Fz * beamsObjectList[8].length / 2
 
-    #Make stiffnessmatrix
+
+def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
+    M = np.zeros((3 * len(nodesObjectList), 3 * len(nodesObjectList)))
+
+    # Make stiffnessmatrix
     for beam in beamsObjectList:
         n1 = beam.node1.number - 1
         n2 = beam.node2.number - 1
@@ -199,8 +233,8 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
                 M[n1 * 3 + i][n2 * 3 + j] += K[i][3 + j]
                 M[n2 * 3 + i][n1 * 3 + j] += K[3 + i][j]
 
-    #Account for fixing point conditions
-    for n,node in enumerate(nodesObjectList):
+    # Account for fixing point conditions
+    for n, node in enumerate(nodesObjectList):
         for k in range(3):
             if k == 0:
                 displacement = node.u
@@ -209,14 +243,14 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
             elif k == 2:
                 displacement = node.ø
 
-            if displacement == 1: # Do nothing
+            if displacement == 1:  # Do nothing
                 pass
-            elif displacement == 2: # Multiply diagonal with 10^6
-                M[n * 3 + k][n *3 + k] = M[n * 3 + k][n * 3 + k]*10**6
-            elif displacement == 0: # Make diagonal 1, rest of row/collumn 0
+            elif displacement == 2:  # Multiply diagonal with 10^6
+                M[n * 3 + k][n * 3 + k] = M[n * 3 + k][n * 3 + k] * 10 ** 6
+            elif displacement == 0:  # Make diagonal 1, rest of row/collumn 0
                 for l in range(len(nodesObjectList)):
                     M[n * 3 + k][l] = 0
                     M[l][n * 3 + k] = 0
                 M[n + k][n + k] = 1
-    print(M)
+
     return M
