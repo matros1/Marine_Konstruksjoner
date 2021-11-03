@@ -218,6 +218,14 @@ class Beam:
         self.node1.Fz += v1*np.cos(self.orientation)
         self.node2.Fx += v2*np.sin(self.orientation)
         self.node2.Fz += v2*np.cos(self.orientation)
+
+    def printBeam(self):
+        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation,2)}\n'
+        for i in range(2):
+            string += f'u{i+1}: {round(self.localDisplacements[i*3],4)} \tN{i+1}: {round(self.reactionForces[i*3],2)}\n'
+            string += f'w{i+1}: {round(self.localDisplacements[i*3+1],4)} \tV{i+1}: {round(self.reactionForces[i*3 + 1],2)}\n'
+            string += f'ø{i+1}: {round(self.localDisplacements[i*3+2],4)} \tM{i+1}: {round(self.reactionForces[i*3 + 2],2)}\n'
+        print(string)
 class Node:
     '''
     This class is mostly used to create beams, but also to store

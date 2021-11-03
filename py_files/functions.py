@@ -252,14 +252,14 @@ def calculateBeamReactionForces(beamsObjectList, r):
     return: adds the reactionforces as member-variables to each beam and returns beamsObjectList
     '''
     for beam in beamsObjectList:
-        LocalDisplacements = np.zeros(6)
+        localDisplacements = np.zeros(6)
         n1 = beam.node1.number - 1
         n2 = beam.node2.number - 1
         for i in range(3):
-            LocalDisplacements[i] = r[3 * n1 + i]
-            LocalDisplacements[3 + i] = r[3 * n2 + i]
-        LocalDisplacements = np.matmul(beam.T_transponent, LocalDisplacements)
-        beam.reactionForces = np.matmul(beam.localStiffnessMatrix, LocalDisplacements)
+            localDisplacements[i] = r[3 * n1 + i]
+            localDisplacements[3 + i] = r[3 * n2 + i]
+        beam.localDisplacements = np.matmul(beam.T, localDisplacements)
+        beam.reactionForces = np.matmul(beam.localStiffnessMatrix, beam.localDisplacements)
         try:
             m1 = (1/20)*beam.q1*(beam.length)**2 + (1/30)*beam.q2*(beam.length)**2
             m2 = -(1/30)*beam.q1*(beam.length)**2 - (1/20)*beam.q2*(beam.length)**2
@@ -273,7 +273,7 @@ def calculateBeamReactionForces(beamsObjectList, r):
     return beamsObjectList
 
 
-def printReactionForces(beamsObjectList, n = 999999999):
+def printBeam(beamsObjectList, n = 999999999):
     '''
     prints the Reactionforces for each beam
     param beamsObjectList: list of all the beam-objects
@@ -283,4 +283,4 @@ def printReactionForces(beamsObjectList, n = 999999999):
     if n > len(beamsObjectList):
         n = len(beamsObjectList)
     for i in range(n):
-        print(beamsObjectList[i].reactionForces)
+        beamsObjectList[i].printBeam()
