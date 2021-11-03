@@ -11,16 +11,10 @@ from structure_visualization import *
 
 def main():
     # Reads some files and makes np arrays
-    # Reads some files and makes np arrays
-    nodeArray, beamArray, materialArray, nodeloadArray, beamdistributedloadArray, beamPointLoadArray, pipeLibrary, IPELibrary = readAll()
-
+    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataJacket.txt")
 
     # Makes lists of node objects and beam objects from nodes and beams np arrays
-    nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadArray,
-                                                                    beamdistributedloadArray, beamPointLoadArray,
-                                                                    pipeLibrary, IPELibrary)
-
-
+    nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray,beamArray, materialArray, nodeloadArray, beamloadArray,pipeLibrary, IPELibrary)
 
     # Makes the Resulting Load Vector
     R = makeResultingLoadVector(nodesObjectList)
@@ -31,6 +25,10 @@ def main():
     # Calculate the displacement vector
     r = np.linalg.solve(K, R)
     print(r[8*3+2], r[9*3])
+
+    #This works for FixedBeam, and partly works for PortalFrame
+    beamsObjectList = calculateBeamReactionForces(beamsObjectList, r)
+    printReactionForces(beamsObjectList, 3)
 
     # TODO: All node are assumed to be fixed, which is not physical. Especially node 11.
 

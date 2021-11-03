@@ -66,3 +66,35 @@ def readAll():
     #total height, width top, bottom, mid, thickness topp, bot
 
     return nodeData,beamData,materialData,nodeLoad,beamDistributedLoadData, beamPointLoadData, PipeData, IPEData
+
+def readInputFile(filepath):
+    '''
+    Reads input file
+    param filepath: filepath
+    return: Lists containing apropriate data
+    '''
+    f = open(filepath,'r')
+    lineList = f.readlines()
+    NODE, BEAM, MATERIAL, NODELOAD, BEAMLOAD, PIPE, IPE =[],[],[],[],[],[],[]
+    for i, line in enumerate(lineList):
+        line = line.split(',')
+        if line[0] == "NODE":
+            NODE.append(line[1:])
+        elif line[0] == "BEAM":
+            BEAM.append(line[1:])
+        elif line[0] == "MATERIAL":
+            MATERIAL.append(line[1:])
+        elif line[0] == "NODELOAD":
+            NODELOAD.append(line[1:])
+        elif line[0] == "BEAMLOAD":
+            BEAMLOAD.append(line[1:])
+        elif line[0] == "PIPE":
+            PIPE.append(line[1:])
+        elif line[0] == "IPE":
+            IPE.append(line[1:])
+        elif line[0] == "---\n":
+            pass
+        else:
+            print(f"Error reading line {i+1} in input file!")
+    f.close()
+    return np.array(NODE, dtype=float),np.array(BEAM,dtype=float),np.array(MATERIAL,dtype=float),np.array(NODELOAD,dtype=int),np.array(BEAMLOAD,dtype=int), np.array(PIPE,dtype=float), np.array(IPE,dtype=float)

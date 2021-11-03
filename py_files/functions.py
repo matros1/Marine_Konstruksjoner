@@ -5,6 +5,12 @@ from importedLibraries import *
 # Funksjoner
 
 def initializeNodesAndBeamsList(nodeArray, beamArray):
+    '''
+    Makes and initializes the object lists, for both beams and nodes
+    param nodeArray: matrix containing node-data from inputfile
+    param beamArray: matrix containing beam-data from inputfile
+    return: Objectlists for beams and nodes
+    '''
     nodesObjectList = []
     beamsObjectList = []
 
@@ -21,16 +27,24 @@ def initializeNodesAndBeamsList(nodeArray, beamArray):
 
 
 def makeBeamsGeometry(beamList, beamsObjectList, pipeLibrary, IPELibrary):
+    '''
+    Decides from the input file which geometry to add to each beam object
+    param beamList: matrix containing beam-data from input file
+    param beamsObjectList: list containing all beam-objects
+    param pipeLibrary: matrix containing pipe-data from input file
+    param IPELibrary: matrix containing IPE-data from input file
+    return: new beamsObjectList with added geometry added to the beams
+    '''
     i = 0
     TempBeamsList = []
     for beam in beamsObjectList:
         if beamList[i][3] == 1:  # If beam geometry is IPE
-            k = beamList[i][4] - 1
+            k = int(beamList[i][4] - 1)
             beam.makeIPE(IPELibrary[k][0], IPELibrary[k][1], IPELibrary[k][2],
                          IPELibrary[k][3], IPELibrary[k][4], IPELibrary[k][5])
             # hight, w top, w bot, w mid, t top, t bot
         elif beamList[i][3] == 2:  # If beam geometry is pipe
-            k = beamList[i][4] - 1
+            k = int(beamList[i][4] - 1)
             beam.makePipe(pipeLibrary[k][0], pipeLibrary[k][1])
             # arguments: radius, ratio air
 
@@ -44,7 +58,7 @@ def giveEmodulToBeams(beamsObjectList, materialArray, beamData):
     i = 0
     TempBeamsList = []
     for beam in beamsObjectList:
-        k = beamData[i][2] - 1
+        k = int(beamData[i][2] - 1)
         beam.makeStiffness(materialArray[k][0])
         TempBeamsList.append(beam)
         i += 1
@@ -64,7 +78,7 @@ def giveLocalStiffnessMatrixToBeamsLocalOrientation(beamsObjectList):
     return beamsObjectList
 
 
-def giveLocalStiffnessMatrixToBeamsInGlobalCoordinates(beamsObjectList):
+def giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList):
     for i in range(len(beamsObjectList)):
         beamsObjectList[i].makeTransformedStiffnessMatrix()
     return beamsObjectList
@@ -150,7 +164,7 @@ def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadAr
     beamsObjectList = giveLocalStiffnessMatrixToBeamsLocalOrientation(beamsObjectList)
 
     # Orients the local stiffness matrix to global coordinates
-    beamsObjectList = giveLocalStiffnessMatrixToBeamsInGlobalCoordinates(beamsObjectList)
+    beamsObjectList = giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList)
 
     # Connects the distributed loads to the beam objects,
     # and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
@@ -209,17 +223,16 @@ def makeResultingLoadVector(nodesObjectList):
     return np.array(R)
 
 
-def addNode13Load(Fx, Fz, M, nodesObjectList, beamsObjectList):
-    nodesObjectList[8].Fx += Fx / 2
-    nodesObjectList[9].Fx += Fx / 2
-    nodesObjectList[8].Fz += Fz / 2
-    nodesObjectList[9].Fz += Fz / 2
-    nodesObjectList[8].M += Fz * beamsObjectList[8].length / 2
-    nodesObjectList[9].M -= Fz * beamsObjectList[8].length / 2
-
-
 def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
-    M = np.zeros((3 * len(nodesObjectList), 3 * len(nodesObjectList)))
+    '''
+    Makes the global stiffnessmatrix by adding the transformed stiffnessmatrix for
+    each beam into the global, in position given by the nodes each beam is connected to.
+    We then account for fixing point coditions (opplagerbetingelser)
+    param beamsObjectList: List of all beam-objects
+    param nodesObjectList: List of all node-objects
+    return: Global stiffness-matrix
+    '''
+    M = np.zeros((3*len(nodesObjectList), 3*len(nodesObjectList)))
 
     # Make stiffnessmatrix
     for beam in beamsObjectList:
@@ -254,3 +267,45 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
                 M[n + k][n + k] = 1
 
     return M
+
+def calculateBeamReactionForces(beamsObjectList, r):
+    '''
+    NB!! This works for FixedBeam, and partly works for PortalFrame
+    Calculates the beams reaction forces and moments
+    param beamsObjectList: List of all beam-objects
+    param r: vector containing all displacements
+    return: adds the reactionforces as member-variables to each beam and returns beamsObjectList
+    '''
+    for beam in beamsObjectList:
+        LocalDisplacements = np.zeros(6)
+        n1 = beam.node1.number - 1
+        n2 = beam.node2.number - 1
+        for i in range(3):
+            LocalDisplacements[i] = r[3 * n1 + i]
+            LocalDisplacements[3 + i] = r[3 * n2 + i]
+        LocalDisplacements = np.matmul(beam.T_transponent, LocalDisplacements)
+        beam.reactionForces = np.matmul(beam.localStiffnessMatrix, LocalDisplacements)
+        try:
+            m1 = (1/20)*beam.q1*(beam.length)**2 + (1/30)*beam.q2*(beam.length)**2
+            m2 = -(1/30)*beam.q1*(beam.length)**2 - (1/20)*beam.q2*(beam.length)**2
+
+            v2 = (m1 + m2 - (beam.q1*beam.length**2)/6 - (beam.q2*beam.length**2)/3)/beam.length
+            v1 = -(beam.length/2)*(beam.q1 + beam.q2) - v2
+
+            beam.reactionForces += np.array([0,v1,m1,0,v2,m2], dtype=float)
+        except AttributeError:
+            pass
+    return beamsObjectList
+
+
+def printReactionForces(beamsObjectList, n = 999999999):
+    '''
+    prints the Reactionforces for each beam
+    param beamsObjectList: list of all the beam-objects
+    param n: if n is given, the function will print forces of the n first beams, else, print for all beams
+    return: prints to console
+    '''
+    if n > len(beamsObjectList):
+        n = len(beamsObjectList)
+    for i in range(n):
+        print(beamsObjectList[i].reactionForces)

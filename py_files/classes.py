@@ -1,5 +1,5 @@
-from functions import *
 from importedLibraries import *
+from functions import *
 
 '''
 This py file creates classes that is handy to use when dealing with larger programs
@@ -8,13 +8,11 @@ One for all beam lengths, coords, orientations, geometry, area, moment of inerti
 Now all this intormation can be stored in one list of Beam objects. Much better.
 '''
 
-
 class Beam:
     '''
     This is a beam class. It includes multiple in house functions. Some is called when initializing and some
     can be called if you want to add info to the beam, such as geometry or number.
     '''
-
     def __init__(self, NODE1, NODE2):
         self.node1 = NODE1
         self.x1 = NODE1.x
@@ -22,8 +20,8 @@ class Beam:
         self.node2 = NODE2
         self.x2 = NODE2.x
         self.z2 = NODE2.z
-        self.orientation = self.get_global_oriantation()
-        self.length = self.get_length()
+        self.orientation = self.getGlobalOrientation()
+        self.length = self.getLength()
 
     def makePipe(self, r, ratioAir):
         '''
@@ -32,13 +30,13 @@ class Beam:
         :param ratioAir: how much of the radius is air (thin walled pipe)
         :return: applies area and moment of inertia to the beam
         '''
-        I = np.pi / 4 * (r ** 4 - ratioAir ** 4)
-        A = np.pi * (r ** 2 - ratioAir ** 2)
+        I = np.pi / 4 * (r**4 - ratioAir**4)
+        A = np.pi * (r**2 - ratioAir**2)
         self.area = A
         self.momentOfInertiaStrong = I
         self.momentOfInertiaWeak = I
 
-    def makeIPE(self, H, w_top, w_bot, w_mid, t_top, t_bot):
+    def makeIPE(self,H,w_top,w_bot,w_mid,t_top,t_bot):
         '''
         Turns the beam object into a IPE profle,
         and calculates corresponding area and moment of inertia.
@@ -70,7 +68,7 @@ class Beam:
         self.momentOfInertiaStrong = momInertiaStrong
         self.momentOfInertiaWeak = momInertiaWeak
 
-    def get_global_oriantation(self):
+    def getGlobalOrientation(self):
         '''
         Calculates the objects orientation and makes a variable called orientation.
         :return:
@@ -90,7 +88,7 @@ class Beam:
             theta_ref_global = 0
         return theta_ref_global
 
-    def get_length(self):
+    def getLength(self):
         '''
         Calculates the objects length. This function is used when initializing the beam.
         :return: length of beam.
@@ -168,22 +166,22 @@ class Beam:
         :return: applies the stiffnessmatrix in the global orientation to the beams
         '''
         a = self.orientation
-        T = np.array([
-            [np.cos(a), -np.sin(a), 0, 0, 0, 0],
-            [np.sin(a), np.cos(a), 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0],
-            [0, 0, 0, np.cos(a), -np.sin(a), 0],
-            [0, 0, 0, np.sin(a), np.cos(a), 0],
-            [0, 0, 0, 0, 0, 1]])
+        self.T = np.array([
+            [np.cos(a), -np.sin(a), 0,  0,          0,          0],
+            [np.sin(a), np.cos(a),  0,  0,          0,          0],
+            [0,         0,          1,  0,          0,          0],
+            [0,         0,          0,  np.cos(a),  -np.sin(a), 0],
+            [0,         0,          0,  np.sin(a),  np.cos(a),  0],
+            [0,         0,          0,  0,          0,          1]])
 
-        T_transponent = np.array([
-            [np.cos(a), np.sin(a), 0, 0, 0, 0],
-            [-np.sin(a), np.cos(a), 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0],
-            [0, 0, 0, np.cos(a), np.sin(a), 0],
-            [0, 0, 0, -np.sin(a), np.cos(a), 0],
-            [0, 0, 0, 0, 0, 1]])
-        self.transformedStiffnessMatrix = list(np.matmul(T, np.matmul(self.localStiffnessMatrix, T_transponent)))
+        self.T_transponent = np.array([
+            [np.cos(a),     np.sin(a),  0,  0,          0,          0],
+            [-np.sin(a),    np.cos(a),  0,  0,          0,          0],
+            [0,             0,          1,  0,          0,          0],
+            [0,             0,          0,  np.cos(a),  np.sin(a),  0],
+            [0,             0,          0,  -np.sin(a), np.cos(a),  0],
+            [0,             0,          0,  0,          0,          1]])
+        self.transformedStiffnessMatrix = list(np.matmul(self.T, np.matmul(self.localStiffnessMatrix, self.T_transponent)))
 
     def addDistributedNormalLoad(self, load):
         '''
@@ -215,8 +213,8 @@ class Beam:
         self.node1.M += m1
         self.node2.M += m2
 
-        v2 = (m1 + m2 - (self.q1 * self.length ** 2) / 6 - (self.q2 * self.length ** 2) / 3) / self.length
-        v1 = -(self.length / 2) * (self.q1 + self.q2) - v2
+        v2 = (m1 + m2 - (self.q1*self.length**2)/6 - (self.q2*self.length**2)/3)/self.length
+        v1 = -(self.length/2)*(self.q1 + self.q2) - v2
 
         self.node1.Fx += v1 * np.sin(self.orientation)
         self.node1.Fz += v1 * np.cos(self.orientation)
@@ -253,6 +251,12 @@ class Node:
         self.number = nodeNumber
 
     def addNodeLoad(self, nodeLoad):
+        '''
+        Adds the nodeloads directly to the nodes
+        param nodeLoad: vector containing the nodeloads
+        -= because we want the reactionforces from the loads
+        '''
         self.Fx -= nodeLoad[1]
         self.Fz -= nodeLoad[2]
         self.M -= nodeLoad[3]
+
