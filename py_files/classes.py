@@ -164,21 +164,22 @@ class Beam:
         :return: applies the stiffnessmatrix in the global orientation to the beams
         '''
         a = self.orientation
-        self.T = np.array([
-            [np.cos(a), -np.sin(a), 0,  0,          0,          0],
-            [np.sin(a), np.cos(a),  0,  0,          0,          0],
-            [0,         0,          1,  0,          0,          0],
-            [0,         0,          0,  np.cos(a),  -np.sin(a), 0],
-            [0,         0,          0,  np.sin(a),  np.cos(a),  0],
-            [0,         0,          0,  0,          0,          1]])
 
-        self.T_transponent = np.array([
+        self.T = np.array([
             [np.cos(a),     np.sin(a),  0,  0,          0,          0],
             [-np.sin(a),    np.cos(a),  0,  0,          0,          0],
             [0,             0,          1,  0,          0,          0],
             [0,             0,          0,  np.cos(a),  np.sin(a),  0],
             [0,             0,          0,  -np.sin(a), np.cos(a),  0],
             [0,             0,          0,  0,          0,          1]])
+            
+        self.T_transponent = np.array([
+            [np.cos(a), -np.sin(a), 0,  0,          0,          0],
+            [np.sin(a), np.cos(a),  0,  0,          0,          0],
+            [0,         0,          1,  0,          0,          0],
+            [0,         0,          0,  np.cos(a),  -np.sin(a), 0],
+            [0,         0,          0,  np.sin(a),  np.cos(a),  0],
+            [0,         0,          0,  0,          0,          1]])
         self.transformedStiffnessMatrix = list(np.matmul(self.T, np.matmul(self.localStiffnessMatrix, self.T_transponent)))
 
     def addDistributedNormalLoad(self, load):
@@ -220,7 +221,7 @@ class Beam:
         self.node2.Fz += v2*np.cos(self.orientation)
 
     def printBeam(self):
-        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation,2)}\n'
+        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation,2)}, L: {round(self.length,2)}\n'
         for i in range(2):
             string += f'u{i+1}: {round(self.localDisplacements[i*3],4)} \tN{i+1}: {round(self.reactionForces[i*3],2)}\n'
             string += f'w{i+1}: {round(self.localDisplacements[i*3+1],4)} \tV{i+1}: {round(self.reactionForces[i*3 + 1],2)}\n'

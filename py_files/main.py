@@ -11,7 +11,9 @@ from structure_visualization import *
 
 def main():
     # Reads some files and makes np arrays
-    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataPortalFrame.txt")
+    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataJacket.txt")
+    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataFixedBeam.txt")
+    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataPortalFrame.txt")
 
     # Makes lists of node objects and beam objects from nodes and beams np arrays
     nodesObjectList, beamsObjectList = makeListOfNodeAndBeamClasses(nodeArray,beamArray, materialArray, nodeloadArray, beamloadArray,pipeLibrary, IPELibrary)
@@ -28,11 +30,11 @@ def main():
 
     #This works for FixedBeam, and partly works for PortalFrame
     beamsObjectList = calculateBeamReactionForces(beamsObjectList, r)
-    printBeam(beamsObjectList, 3)
+    printBeam(beamsObjectList)
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
     # The plot only shows rotations, which is scaled by a factor of 30
-    plot(nodeArray,beamArray, r)
+    plot(nodeArray,beamArray, r * 30)
 
     return 0
 
