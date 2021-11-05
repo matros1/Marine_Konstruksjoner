@@ -133,49 +133,6 @@ def dimentionizeLoadsOnBeams(beamArray, loadArray, IPElibrary, pipeLibrary):
     return np.array(loadNew)
 
 
-def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadArray, beamDistributedloadArray,
-                                 pipeLibrary, IPELibrary):
-    '''
-    Takes one np array of beams and one of nodes a turns them into a list of node and beam objects.
-    :param NODE: np array of all nodes
-    :param BEAM: np array of all beams
-    :return: list of node and beam classes
-    '''
-    # Inizializes beams and nodes objects and appends to list.
-    nodesObjectList, beamsObjectList = initializeNodesAndBeamsList(nodeArray, beamArray)
-
-    # Uses spesifications from text files to create correct geometry for each beam.
-    beamsObjectList = makeBeamsGeometry(beamArray, beamsObjectList, pipeLibrary, IPELibrary)
-
-    # Gives correct E modulus to each beam.
-    beamsObjectList = giveEmodulToBeams(beamsObjectList, materialArray, beamArray)
-
-    # Enumerates beams
-    beamsObjectList = giveNumberToObjects(beamsObjectList)
-
-    # Enumerates nodes
-    nodesObjectList = giveNumberToObjects(nodesObjectList)
-
-    # Creates the local stiffness matrix of each beam.
-    beamsObjectList = giveLocalStiffnessMatrixToBeamsLocalOrientation(beamsObjectList)
-
-    # Orients the local stiffness matrix to global coordinates
-    beamsObjectList = giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList)
-    print(beamDistributedloadArray)
-    beamDistributedloadArray = dimentionizeLoadsOnBeams(beamArray, beamDistributedloadArray, IPELibrary, pipeLibrary)
-    print(beamDistributedloadArray)
-
-    # Connects the distributed loads to the beam objects,
-    # and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
-    connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamDistributedloadArray, IPELibrary,
-                                                        pipeLibrary)
-
-    # Connects nodeloads to the nodes
-    nodesObjectList = connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
-
-    return nodesObjectList, beamsObjectList
-
-
 def getMomentFromTriangleLoad(q1, q2, L):
     '''
     Returns a array of the moment distribution along a beam from a triangle pluss rectangle load.

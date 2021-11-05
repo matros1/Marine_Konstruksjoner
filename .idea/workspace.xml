@@ -26,17 +26,10 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="63919abc-3143-4d9a-98cf-126dc30e8689" name="Default Changelist" comment="Added possibility to add point loads at any beam">
-      <change afterPath="$PROJECT_DIR$/py_files/TestJacketData.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/py_files/test2.txt" afterDir="false" />
+    <list default="true" id="63919abc-3143-4d9a-98cf-126dc30e8689" name="Default Changelist" comment="Added scaling of beam forces with respect to beam dimentions. Scaling constant:&#10; k = D/1.5m">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/InputDataFixedBeam.txt" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/InputDataFixedBeam.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/InputDataFixedBeam2.txt" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/InputDataFixedBeam2.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/InputDataJacket.txt" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/InputDataJacket.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/InputDataPortalFrame.txt" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/InputDataPortalFrame.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/py_files/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/py_files/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/py_files/readTextToArray.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/readTextToArray.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,7 +127,14 @@
       <option name="project" value="LOCAL" />
       <updated>1635935348217</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added scaling of beam forces with respect to beam dimentions. Scaling constant:&#10; k = D/1.5m">
+      <created>1636118065710</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1636118065710</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -209,7 +209,8 @@
     <MESSAGE value="Wrote a comment." />
     <MESSAGE value="All Hugo updates from this week." />
     <MESSAGE value="Added possibility to add point loads at any beam" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added possibility to add point loads at any beam" />
+    <MESSAGE value="Added scaling of beam forces with respect to beam dimentions. Scaling constant:&#10; k = D/1.5m" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added scaling of beam forces with respect to beam dimentions. Scaling constant:&#10; k = D/1.5m" />
   </component>
   <component name="WindowStateProjectService">
     <state x="534" y="214" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1635432580628">
@@ -220,26 +221,26 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="484" y="8" key="#main/0.0.1536.824@0.0.1536.824" timestamp="1635326829753" />
-    <state width="1515" height="268" key="GridCell.Tab.0.bottom" timestamp="1636117717879">
+    <state width="1515" height="268" key="GridCell.Tab.0.bottom" timestamp="1636118792234">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="210" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.-67.1920.1160@0.0.1536.824" timestamp="1635434800554" />
-    <state width="1515" height="268" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1636117717879" />
-    <state width="1515" height="268" key="GridCell.Tab.0.center" timestamp="1636117717879">
+    <state width="1515" height="268" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1636118792234" />
+    <state width="1515" height="268" key="GridCell.Tab.0.center" timestamp="1636118792233">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="210" key="GridCell.Tab.0.center/0.0.1536.824/-1920.-67.1920.1160@0.0.1536.824" timestamp="1635434800553" />
-    <state width="1515" height="268" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1636117717879" />
-    <state width="1515" height="268" key="GridCell.Tab.0.left" timestamp="1636117717878">
+    <state width="1515" height="268" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1636118792233" />
+    <state width="1515" height="268" key="GridCell.Tab.0.left" timestamp="1636118792233">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="210" key="GridCell.Tab.0.left/0.0.1536.824/-1920.-67.1920.1160@0.0.1536.824" timestamp="1635434800553" />
-    <state width="1515" height="268" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1636117717878" />
-    <state width="1515" height="268" key="GridCell.Tab.0.right" timestamp="1636117717879">
+    <state width="1515" height="268" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1636118792233" />
+    <state width="1515" height="268" key="GridCell.Tab.0.right" timestamp="1636118792234">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="210" key="GridCell.Tab.0.right/0.0.1536.824/-1920.-67.1920.1160@0.0.1536.824" timestamp="1635434800553" />
-    <state width="1515" height="268" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1636117717879" />
+    <state width="1515" height="268" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1636118792234" />
     <state x="147" y="65" key="MergeDialog" timestamp="1636113574054">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
