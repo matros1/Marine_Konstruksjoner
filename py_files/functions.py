@@ -84,7 +84,7 @@ def giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList):
     return beamsObjectList
 
 
-def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray):
+def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray, IPELibrary, pipeLibrary):
     '''
     Connects the distributed loads to the beam objects,
         and calculates Fixed Clamping Moment (FastInnspenningsmomenter)
@@ -101,7 +101,7 @@ def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloa
                 beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i])
                 beamsObjectList[j].calculateFIM()
     return beamsObjectList
-    
+
 
 def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
     '''
@@ -116,8 +116,25 @@ def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
     return nodesObjectList
 
 
+def dimentionizeLoadsOnBeams(beamArray, loadArray, IPElibrary, pipeLibrary):
+    loadNew = []
+    for i in range(len(loadArray)):
+        IPEorPipe = beamArray[loadArray[i][0] - 1][3]
+        geo = int(beamArray[loadArray[i][0] - 1][4] - 1)
+        if (IPEorPipe == 1):
+            D = IPElibrary[geo][0]
+        elif (IPEorPipe == 2):
+            D = 2 * pipeLibrary[geo][0]
+        k = D / 1.5
+        h = [int(loadArray[i][0])]
+        for t in range(1, len(loadArray[i])):
+            h.append(int(k * loadArray[i][t]))
+        loadNew.append(h)
+    return np.array(loadNew)
+
+
 def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadArray, beamDistributedloadArray,
-                                 beamPointloadArray, pipeLibrary, IPELibrary):
+                                 pipeLibrary, IPELibrary):
     '''
     Takes one np array of beams and one of nodes a turns them into a list of node and beam objects.
     :param NODE: np array of all nodes
@@ -144,16 +161,17 @@ def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadAr
 
     # Orients the local stiffness matrix to global coordinates
     beamsObjectList = giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList)
+    print(beamDistributedloadArray)
+    beamDistributedloadArray = dimentionizeLoadsOnBeams(beamArray, beamDistributedloadArray, IPELibrary, pipeLibrary)
+    print(beamDistributedloadArray)
 
     # Connects the distributed loads to the beam objects,
     # and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
-    connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamDistributedloadArray)
+    connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamDistributedloadArray, IPELibrary,
+                                                        pipeLibrary)
 
     # Connects nodeloads to the nodes
     nodesObjectList = connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
-
-    # Calculates FIM in node1 and node2 of a beam given by beamPointloadArray and appends these to corresponding nodes.
-    nodesObjectList = connectPointLoadsToNodesAndCalculateFIM(beamsObjectList, beamPointloadArray, nodesObjectList)
 
     return nodesObjectList, beamsObjectList
 
@@ -211,7 +229,7 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
     param nodesObjectList: List of all node-objects
     return: Global stiffness-matrix
     '''
-    M = np.zeros((3*len(nodesObjectList), 3*len(nodesObjectList)))
+    M = np.zeros((3 * len(nodesObjectList), 3 * len(nodesObjectList)))
 
     # Make stiffnessmatrix
     for beam in beamsObjectList:
@@ -247,6 +265,7 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
 
     return M
 
+
 def calculateBeamReactionForces(beamsObjectList, r):
     '''
     NB!! This works for FixedBeam, and partly works for PortalFrame
@@ -265,19 +284,19 @@ def calculateBeamReactionForces(beamsObjectList, r):
         beam.localDisplacements = np.matmul(beam.T_transponent, localDisplacements)
         beam.reactionForces = np.matmul(beam.localStiffnessMatrix, beam.localDisplacements)
         try:
-            m1 = (1/20)*beam.q1*(beam.length)**2 + (1/30)*beam.q2*(beam.length)**2
-            m2 = -(1/30)*beam.q1*(beam.length)**2 - (1/20)*beam.q2*(beam.length)**2
+            m1 = (1 / 20) * beam.q1 * (beam.length) ** 2 + (1 / 30) * beam.q2 * (beam.length) ** 2
+            m2 = -(1 / 30) * beam.q1 * (beam.length) ** 2 - (1 / 20) * beam.q2 * (beam.length) ** 2
 
-            v2 = (m1 + m2 - (beam.q1*beam.length**2)/6 - (beam.q2*beam.length**2)/3)/beam.length
-            v1 = -(beam.length/2)*(beam.q1 + beam.q2) - v2
+            v2 = (m1 + m2 - (beam.q1 * beam.length ** 2) / 6 - (beam.q2 * beam.length ** 2) / 3) / beam.length
+            v1 = -(beam.length / 2) * (beam.q1 + beam.q2) - v2
 
-            beam.reactionForces += np.array([0,v1,m1,0,v2,m2], dtype=float)
+            beam.reactionForces += np.array([0, v1, m1, 0, v2, m2], dtype=float)
         except AttributeError:
             pass
     return beamsObjectList
 
 
-def printBeam(beamsObjectList, n = 999999999):
+def printBeam(beamsObjectList, n=999999999):
     '''
     prints the Reactionforces for each beam
     param beamsObjectList: list of all the beam-objects

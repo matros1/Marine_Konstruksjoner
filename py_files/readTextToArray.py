@@ -1,17 +1,19 @@
 from importedLibraries import *
 
+
 def readCSV_float(filename):
     '''
     Reads from file and makes an float array of list elements.
     :param filename: .txt file
     :return: np.array() of flots
     '''
-    f = open(filename,'r')
+    f = open(filename, 'r')
     NODE = f.readlines()
-    for i,linje in enumerate(NODE):
+    for i, linje in enumerate(NODE):
         NODE[i] = linje.split(',')
     f.close()
     return np.array(NODE, float)
+
 
 def readCSV_int(filename):
     '''
@@ -19,9 +21,9 @@ def readCSV_int(filename):
     :param filename: .txt file
     :return: np.array() of flots
     '''
-    f = open(filename,'r')
+    f = open(filename, 'r')
     NODE = f.readlines()
-    for i,linje in enumerate(NODE):
+    for i, linje in enumerate(NODE):
         NODE[i] = linje.split(',')
     f.close()
     return np.array(NODE, int)
@@ -53,19 +55,14 @@ def readAll():
 
     beamDistributedLoadData = readCSV_int("BeamLoadData.txt")
 
-
-
-    beamPointLoadData = readCSV_float("BeamPointLoadData.txt")
-    #beam number, Fz in local coordinates,position in precent of length from beam.node1.
-
-
     PipeData = readCSV_float("PipeData")
     # radius, ratio air
 
     IPEData = readCSV_float("IPEData")
-    #total height, width top, bottom, mid, thickness topp, bot
+    # total height, width top, bottom, mid, thickness topp, bot
 
-    return nodeData,beamData,materialData,nodeLoad,beamDistributedLoadData, beamPointLoadData, PipeData, IPEData
+    return nodeData, beamData, materialData, nodeLoad, beamDistributedLoadData, PipeData, IPEData
+
 
 def readInputFile(filepath):
     '''
@@ -73,9 +70,9 @@ def readInputFile(filepath):
     param filepath: filepath
     return: Lists containing apropriate data
     '''
-    f = open(filepath,'r')
+    f = open(filepath, 'r')
     lineList = f.readlines()
-    NODE, BEAM, MATERIAL, NODELOAD, BEAMLOAD, PIPE, IPE =[],[],[],[],[],[],[]
+    NODE, BEAM, MATERIAL, NODELOAD, BEAMLOAD, PIPE, IPE, POINTLOAD = [], [], [], [], [], [], [], []
     for i, line in enumerate(lineList):
         line = line.split(',')
         if line[0] == "NODE":
@@ -92,9 +89,12 @@ def readInputFile(filepath):
             PIPE.append(line[1:])
         elif line[0] == "IPE":
             IPE.append(line[1:])
+        elif line[0] == "POINTLOAD":
+            POINTLOAD.append(line[1:])
         elif line[0] == "---\n":
             pass
         else:
-            print(f"Error reading line {i+1} in input file!")
+            print(f"Error reading line {i + 1} in input file!")
     f.close()
-    return np.array(NODE, dtype=float),np.array(BEAM,dtype=float),np.array(MATERIAL,dtype=float),np.array(NODELOAD,dtype=int),np.array(BEAMLOAD,dtype=int), np.array(PIPE,dtype=float), np.array(IPE,dtype=float)
+    return np.array(NODE, dtype=float), np.array(BEAM, dtype=float), np.array(MATERIAL, dtype=float), np.array(NODELOAD,dtype=int), \
+           np.array(BEAMLOAD, dtype=int), np.array(PIPE, dtype=float), np.array(IPE, dtype=float)
