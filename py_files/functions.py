@@ -273,7 +273,7 @@ def calculateBeamReactionForces(beamsObjectList, r):
     return beamsObjectList
 
 
-def printBeam(beamsObjectList, n = 999999999):
+def printBeams(beamsObjectList, n = 999999999):
     '''
     prints the Reactionforces for each beam
     param beamsObjectList: list of all the beam-objects

@@ -30,7 +30,7 @@ def main():
 
     #This works for FixedBeam, and partly works for PortalFrame
     beamsObjectList = calculateBeamReactionForces(beamsObjectList, r)
-    printBeam(beamsObjectList)
+    printBeams(beamsObjectList)
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
     # The plot only shows rotations, which is scaled by a factor of 30

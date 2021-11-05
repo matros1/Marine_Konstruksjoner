@@ -221,7 +221,7 @@ class Beam:
         self.node2.Fz += v2*np.cos(self.orientation)
 
     def printBeam(self):
-        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation,2)}, L: {round(self.length,2)}\n'
+        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation*180/np.pi,2)}, L: {round(self.length,2)}\n'
         for i in range(2):
             string += f'u{i+1}: {round(self.localDisplacements[i*3],4)} \tN{i+1}: {round(self.reactionForces[i*3],2)}\n'
             string += f'w{i+1}: {round(self.localDisplacements[i*3+1],4)} \tV{i+1}: {round(self.reactionForces[i*3 + 1],2)}\n'
