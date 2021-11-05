@@ -101,28 +101,7 @@ def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloa
                 beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i])
                 beamsObjectList[j].calculateFIM()
     return beamsObjectList
-
-
-def connectPointLoadsToNodesAndCalculateFIM(beamsObjectList, beamPointloadArray, nodesObjectList):
-    for beam in beamsObjectList:
-        for i in range(len(beamPointloadArray)):
-            if beam.number == beamPointloadArray[i][0]:
-                P = beamPointloadArray[i][1]
-                dL = beamPointloadArray[i][2]
-                theta = beam.orientation
-                n1 = beam.node1.number
-                n2 = beam.node2.number
-                P1 = P * (1 - dL)
-                P2 = P * dL
-                # Fast clamping moment from 2 times statically indetermined beam.
-                M1 = -P * dL * (1 - dL) ** 2 / beam.length ** 2
-                M2 = P * dL ** 2 * (1 - dL) / beam.length ** 2
-                load1 = [0, P1 * np.cos(theta), P1 * np.sin(theta), M1]
-                load2 = [0, P2 * np.cos(theta), P2 * np.sin(theta), M2]
-                nodesObjectList[n1 - 1].addNodeLoad(load1)
-                nodesObjectList[n2 - 1].addNodeLoad(load2)
-    return nodesObjectList
-
+    
 
 def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
     '''
@@ -277,14 +256,14 @@ def calculateBeamReactionForces(beamsObjectList, r):
     return: adds the reactionforces as member-variables to each beam and returns beamsObjectList
     '''
     for beam in beamsObjectList:
-        LocalDisplacements = np.zeros(6)
+        localDisplacements = np.zeros(6)
         n1 = beam.node1.number - 1
         n2 = beam.node2.number - 1
         for i in range(3):
-            LocalDisplacements[i] = r[3 * n1 + i]
-            LocalDisplacements[3 + i] = r[3 * n2 + i]
-        LocalDisplacements = np.matmul(beam.T_transponent, LocalDisplacements)
-        beam.reactionForces = np.matmul(beam.localStiffnessMatrix, LocalDisplacements)
+            localDisplacements[i] = r[3 * n1 + i]
+            localDisplacements[3 + i] = r[3 * n2 + i]
+        beam.localDisplacements = np.matmul(beam.T_transponent, localDisplacements)
+        beam.reactionForces = np.matmul(beam.localStiffnessMatrix, beam.localDisplacements)
         try:
             m1 = (1/20)*beam.q1*(beam.length)**2 + (1/30)*beam.q2*(beam.length)**2
             m2 = -(1/30)*beam.q1*(beam.length)**2 - (1/20)*beam.q2*(beam.length)**2
@@ -298,7 +277,7 @@ def calculateBeamReactionForces(beamsObjectList, r):
     return beamsObjectList
 
 
-def printReactionForces(beamsObjectList, n = 999999999):
+def printBeam(beamsObjectList, n = 999999999):
     '''
     prints the Reactionforces for each beam
     param beamsObjectList: list of all the beam-objects
@@ -308,4 +287,4 @@ def printReactionForces(beamsObjectList, n = 999999999):
     if n > len(beamsObjectList):
         n = len(beamsObjectList)
     for i in range(n):
-        print(beamsObjectList[i].reactionForces)
+        beamsObjectList[i].printBeam()

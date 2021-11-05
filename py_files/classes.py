@@ -166,21 +166,22 @@ class Beam:
         :return: applies the stiffnessmatrix in the global orientation to the beams
         '''
         a = self.orientation
-        self.T = np.array([
-            [np.cos(a), -np.sin(a), 0,  0,          0,          0],
-            [np.sin(a), np.cos(a),  0,  0,          0,          0],
-            [0,         0,          1,  0,          0,          0],
-            [0,         0,          0,  np.cos(a),  -np.sin(a), 0],
-            [0,         0,          0,  np.sin(a),  np.cos(a),  0],
-            [0,         0,          0,  0,          0,          1]])
 
-        self.T_transponent = np.array([
+        self.T = np.array([
             [np.cos(a),     np.sin(a),  0,  0,          0,          0],
             [-np.sin(a),    np.cos(a),  0,  0,          0,          0],
             [0,             0,          1,  0,          0,          0],
             [0,             0,          0,  np.cos(a),  np.sin(a),  0],
             [0,             0,          0,  -np.sin(a), np.cos(a),  0],
             [0,             0,          0,  0,          0,          1]])
+
+        self.T_transponent = np.array([
+            [np.cos(a), -np.sin(a), 0,  0,          0,          0],
+            [np.sin(a), np.cos(a),  0,  0,          0,          0],
+            [0,         0,          1,  0,          0,          0],
+            [0,         0,          0,  np.cos(a),  -np.sin(a), 0],
+            [0,         0,          0,  np.sin(a),  np.cos(a),  0],
+            [0,         0,          0,  0,          0,          1]])
         self.transformedStiffnessMatrix = list(np.matmul(self.T, np.matmul(self.localStiffnessMatrix, self.T_transponent)))
 
     def addDistributedNormalLoad(self, load):
@@ -216,12 +217,18 @@ class Beam:
         v2 = (m1 + m2 - (self.q1*self.length**2)/6 - (self.q2*self.length**2)/3)/self.length
         v1 = -(self.length/2)*(self.q1 + self.q2) - v2
 
-        self.node1.Fx += v1 * np.sin(self.orientation)
-        self.node1.Fz += v1 * np.cos(self.orientation)
-        self.node2.Fx += v2 * np.sin(self.orientation)
-        self.node2.Fz += v2 * np.cos(self.orientation)
+        self.node1.Fx += v1*np.sin(self.orientation)
+        self.node1.Fz += v1*np.cos(self.orientation)
+        self.node2.Fx += v2*np.sin(self.orientation)
+        self.node2.Fz += v2*np.cos(self.orientation)
 
-
+    def printBeam(self):
+        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation,2)}, L: {round(self.length,2)}\n'
+        for i in range(2):
+            string += f'u{i+1}: {round(self.localDisplacements[i*3],4)} \tN{i+1}: {round(self.reactionForces[i*3],2)}\n'
+            string += f'w{i+1}: {round(self.localDisplacements[i*3+1],4)} \tV{i+1}: {round(self.reactionForces[i*3 + 1],2)}\n'
+            string += f'ø{i+1}: {round(self.localDisplacements[i*3+2],4)} \tM{i+1}: {round(self.reactionForces[i*3 + 2],2)}\n'
+        print(string)
 class Node:
     '''
     This class is mostly used to create beams, but also to store

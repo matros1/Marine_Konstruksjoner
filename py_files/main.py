@@ -28,13 +28,13 @@ def main():
 
     #This works for FixedBeam, and partly works for PortalFrame
     beamsObjectList = calculateBeamReactionForces(beamsObjectList, r)
-    printReactionForces(beamsObjectList, 3)
+    printBeam(beamsObjectList)
 
     # TODO: All node are assumed to be fixed, which is not physical. Especially node 11.
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
-    # the code runs, but deformations look too small or non existent
-    plot(nodeArray, beamArray, r)
+    # The plot only shows rotations, which is scaled by a factor of 30
+    plot(nodeArray,beamArray, r * 30)
 
     return 0
 

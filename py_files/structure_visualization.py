@@ -77,9 +77,6 @@ def plot_structure_def(ax, punkt, elem, numbers, index_start, r):
     # This function plots the deformed beam structure defined by nodes and elements
     # The bool (0 or 1) 'numbers' decides if node and element numbers are plotted or not
 
-    #Scale
-    r = r*30
-
     # Change input to the correct format
     nodes = np.array(punkt[:, 0:2], copy = 1, dtype = int)
     el_nod = np.array(elem[:, 0:2], copy=1, dtype=int)
