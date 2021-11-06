@@ -11,7 +11,7 @@ from structure_visualization import *
 
 def main():
     # Reads some files and makes np arrays
-    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataJacket.txt")
+    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, loadScale= readInputFile("InputDataJacket.txt")
     #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataFixedBeam.txt")
     #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataPortalFrame.txt")
 
@@ -38,7 +38,7 @@ def main():
 
     # Connects the distributed loads to the beam objects,
     # and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
-    beamsObjectList = connectAndScaleDistributedLoadsAndCalculateFixedSupport(beamsObjectList, beamloadArray, 1.5)
+    beamsObjectList = connectAndScaleDistributedLoadsAndCalculateFixedSupport(beamsObjectList, beamloadArray, loadScale)
 
     # Connects nodeloads to the nodes
     nodesObjectList = connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
