@@ -58,7 +58,7 @@ def giveEmodulToBeams(beamsObjectList, materialArray, beamData):
     TempBeamsList = []
     for beam in beamsObjectList:
         k = int(beamData[i][2] - 1)
-        beam.makeStiffness(materialArray[k][0])
+        beam.makeStiffness(materialArray[k])
         TempBeamsList.append(beam)
         i += 1
 
@@ -83,7 +83,7 @@ def giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList):
     return beamsObjectList
 
 
-def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray):
+def connectAndScaleDistributedLoadsAndCalculateFixedSupport(beamsObjectList, beamloadArray, base = 1):
     '''
     Connects the distributed loads to the beam objects,
         and calculates Fixed Clamping Moment (FastInnspenningsmomenter)
@@ -92,13 +92,14 @@ def connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloa
     :param beamloadArray: np array of all distributed loads
     :return: uses member funtion Beam.addDistributedLoad(beamload),
         where beamload is a list with data for the distributed load
-        also uses member function Beam.calculateFIM()
+        also uses member function Beam.FixedSupport()
     '''
     for i in range(len(beamloadArray)):
         for j in range(len(beamsObjectList)):
             if (beamsObjectList[j].number == beamloadArray[i][0]):
                 beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i])
-                beamsObjectList[j].calculateFIM()
+                beamsObjectList[j].scaleDistributedLoad(base)
+                beamsObjectList[j].calculateFixedSupport()
     return beamsObjectList
     
 
@@ -113,45 +114,6 @@ def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
             if (nodesObjectList[j].number == nodeloadArray[i][0]):
                 nodesObjectList[j].addNodeLoad(nodeloadArray[i])
     return nodesObjectList
-
-
-def makeListOfNodeAndBeamClasses(nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary,
-                                 IPELibrary):
-    '''
-    Takes one np array of beams and one of nodes a turns them into a list of node and beam objects.
-    :param NODE: np array of all nodes
-    :param BEAM: np array of all beams
-    :return: list of node and beam classes
-    '''
-    # Inizializes beams and nodes objects and appends to list.
-    nodesObjectList, beamsObjectList = initializeNodesAndBeamsList(nodeArray, beamArray)
-
-    # Uses spesifications from text files to create correct geometry for each beam.
-    beamsObjectList = makeBeamsGeometry(beamArray, beamsObjectList, pipeLibrary, IPELibrary)
-
-    # Gives correct E modulus to each beam.
-    beamsObjectList = giveEmodulToBeams(beamsObjectList, materialArray, beamArray)
-
-    # Enumerates beams
-    beamsObjectList = giveNumberToObjects(beamsObjectList)
-
-    # Enumerates nodes
-    nodesObjectList = giveNumberToObjects(nodesObjectList)
-
-    # Creates the local stiffness matrix of each beam.
-    beamsObjectList = giveLocalStiffnessMatrixToBeamsLocalOrientation(beamsObjectList)
-
-    # Orients the local stiffness matrix to global coordinates
-    beamsObjectList = giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList)
-
-    # Connects the distributed loads to the beam objects,
-    # and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
-    connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray)
-
-    # Connects nodeloads to the nodes
-    connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
-
-    return nodesObjectList, beamsObjectList
 
 
 def getMomentFromTriangleLoad(q1, q2, L):
@@ -273,14 +235,23 @@ def calculateBeamReactionForces(beamsObjectList, r):
     return beamsObjectList
 
 
-def printBeams(beamsObjectList, n = 999999999):
+def printBeams(beamsObjectList, s = 0, n = 999999999):
     '''
     prints the Reactionforces for each beam
     param beamsObjectList: list of all the beam-objects
     param n: if n is given, the function will print forces of the n first beams, else, print for all beams
     return: prints to console
     '''
-    if n > len(beamsObjectList):
-        n = len(beamsObjectList)
+    if n > len(beamsObjectList)-s:
+        n = len(beamsObjectList)-s
     for i in range(n):
-        beamsObjectList[i].printBeam()
+        beamsObjectList[i+s].printBeam()
+        beamsObjectList[i+s].printBeamMoments()
+        beamsObjectList[i+s].printSecurityFactor()
+
+def calculateMaxMomentAndBendingTension(beamsObjectList):
+    for i in range(len(beamsObjectList)):
+        beamsObjectList[i].calculateMaxMoment()
+        beamsObjectList[i].calculateMaxBendingTension()
+    return beamsObjectList
+
