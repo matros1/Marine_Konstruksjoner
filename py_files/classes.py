@@ -35,6 +35,8 @@ class Beam:
         self.area = A
         self.momentOfInertiaStrong = I
         self.momentOfInertiaWeak = I
+        self.diameter = 2*r
+        self.Zc = r
 
     def makeIPE(self,H,w_top,w_bot,w_mid,t_top,t_bot):
         '''
@@ -52,21 +54,20 @@ class Beam:
         Abot = w_bot * t_bot
         Amid = (H - t_top - t_bot) * w_mid
 
-        zc = (Atop * (H - t_top / 2) + Amid * ((H - t_top - t_bot) / 2 + t_bot) + Abot * t_bot / 2) / (
-                Atop + Amid + Abot)
+        self.Zc = (Atop*(H - t_top/2) + Amid*((H-t_top-t_bot)/2 + t_bot) + Abot*t_bot/2)/(Atop + Amid + Abot)
 
         Itop = w_top * t_top ** 3 / 12
         Ibot = w_bot * t_bot ** 3 / 12
         Imid = (H - t_top - t_bot) ** 3 * w_mid / 12
 
         area = Atop + Abot + Amid
-        momInertiaStrong = Itop + Ibot + Imid + Atop * (H - t_top / 2 - zc) ** 2 + Amid * (
-                (H - t_top - t_bot) / 2 + t_bot - zc) ** 2 + Abot * (t_bot / 2 - zc) ** 2
-        momInertiaWeak = (w_top ** 3 * t_top + w_mid ** 3 * (H - t_top - t_bot) + w_bot ** 3 * t_bot) / 12
+        momInertiaStrong = Itop + Ibot + Imid + Atop*(H - t_top/2 - self.Zc)**2 + Amid*((H-t_top-t_bot)/2 + t_bot - self.Zc)**2 + Abot*(t_bot/2 - self.Zc)**2
+        momInertiaWeak = (w_top**3*t_top + w_mid**3 * (H-t_top-t_bot) + w_bot**3 * t_bot)/12
 
         self.area = area
         self.momentOfInertiaStrong = momInertiaStrong
         self.momentOfInertiaWeak = momInertiaWeak
+        self.diameter = max([w_top, w_bot])
 
     def getGlobalOrientation(self):
         '''
@@ -105,14 +106,15 @@ class Beam:
         '''
         self.number = beamNumber
 
-    def makeStiffness(self, E):
+    def makeStiffness(self, materialArray):
         '''
         Implements E modulus and appends stiffness to beam. This requires that moment of inertia
         already is made.
         :param E:
         :return:
         '''
-        self.E = E
+        self.E = materialArray[0]
+        self.sigmafy = materialArray[1]
         self.stiffnessStrongAxis = self.momentOfInertiaStrong * self.E
         self.stiffnessWeakAxis = self.momentOfInertiaWeak * self.E
 
@@ -202,10 +204,10 @@ class Beam:
             self.q1 = load[1] / np.sin(self.orientation) + load[2] / np.cos(self.orientation)
             self.q2 = load[3] / np.sin(self.orientation) + load[4] / np.cos(self.orientation)
 
-    def calculateFIM(self):
+    def calculateFixedSupport(self):
         '''
-        Calculates FIM  and sheer for beams affected by distributed loads
-        Adds FIM and sheer to the nodes affected
+        Calculates Fixed Support for beams affected by distributed loads
+        Adds Fixed Support to the nodes affected
         Based on table found in "TMR4167 Marin teknikk 2 – Konstruksjoner - Del 1", page 281
         '''
         m1 = (1 / 20) * self.q1 * (self.length) ** 2 + (1 / 30) * self.q2 * (self.length) ** 2
@@ -223,12 +225,50 @@ class Beam:
         self.node2.Fz += v2*np.cos(self.orientation)
 
     def printBeam(self):
-        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation,2)}, L: {round(self.length,2)}\n'
+        '''
+        Prints beam data in a more readable way
+        '''
+        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation*180/np.pi,2)}, L: {round(self.length,2)}\n'
         for i in range(2):
             string += f'u{i+1}: {round(self.localDisplacements[i*3],4)} \tN{i+1}: {round(self.reactionForces[i*3],2)}\n'
             string += f'w{i+1}: {round(self.localDisplacements[i*3+1],4)} \tV{i+1}: {round(self.reactionForces[i*3 + 1],2)}\n'
             string += f'ø{i+1}: {round(self.localDisplacements[i*3+2],4)} \tM{i+1}: {round(self.reactionForces[i*3 + 2],2)}\n'
         print(string)
+
+    def scaleDistributedLoad(self, base):
+            self.q1 *= self.diameter/base
+            self.q2 *= self.diameter/base
+
+    def calculateMaxMoment(self):
+        try:
+            #Max moment where sheer = 0, and where the resultant force of the distributed load attacks
+            self.L_R = ((self.q1/2 + self.q2)*2*self.length)/((self.q1 + self.q2)*3)
+            q_R = (self.q1 - self.q1*self.L_R/self.length) + self.q2*self.L_R/self.length
+            if abs(self.q1) < abs(q_R):
+                self.M_R = -self.reactionForces[2]-self.reactionForces[1]*self.L_R - (self.q1*self.L_R**2)/2 - (q_R - self.q1)*(self.L_R**2)/6
+            else:
+                self.M_R = -self.reactionForces[2]-self.reactionForces[1]*self.L_R - (q_R*self.L_R**2)/2 - (self.q1 - q_R)*(self.L_R**2)/3
+
+        except AttributeError:
+            pass
+
+    def printBeamMoments(self):
+        try:
+            string = f'M1: {round(self.reactionForces[2])}, M_max: {round(self.M_R)} at {round(self.L_R,3)}, M2: {round(self.reactionForces[5])}'
+        except AttributeError:
+            string = f'M1: {round(self.reactionForces[2])}, No ditributed load, M2: {round(self.reactionForces[5])}'
+        print(string)
+
+    def calculateMaxBendingTension(self):
+        try:
+            self.sigmax = max([abs(self.reactionForces[2]), abs(self.M_R), abs(self.reactionForces[5])])*self.Zc/self.momentOfInertiaStrong
+        except AttributeError:
+            self.sigmax = max([abs(self.reactionForces[2]), abs(self.reactionForces[5])])*self.Zc/self.momentOfInertiaStrong
+        self.securityFactor = self.sigmax/self.sigmafy
+
+    def printSecurityFactor(self):
+        print(f'Sigma_x: {round(self.sigmax/10**6)} [MPa], {round(self.securityFactor*100)}% of fy\n\n')
+
 class Node:
     '''
     This class is mostly used to create beams, but also to store

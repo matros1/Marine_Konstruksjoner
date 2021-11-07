@@ -4,15 +4,13 @@ from plotVisualization import *
 from readTextToArray import *
 from structure_visualization import *
 
-
-# This file reads in all subfiles.
-# This is the command room, and here we controll the program.
-
+# This is the command room, here we controll the program.
 
 def main():
     # Reads some files and makes np arrays
-    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile(
-        "InputDataJacket.txt")
+    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, loadScale= readInputFile("InputDataJacket.txt")
+    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataFixedBeam.txt")
+    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataPortalFrame.txt")
 
     # Inizializes beams and nodes objects and appends to list.
     nodesObjectList, beamsObjectList = initializeNodesAndBeamsList(nodeArray, beamArray)
@@ -35,13 +33,9 @@ def main():
     # Orients the local stiffness matrix to global coordinates
     beamsObjectList = giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList)
 
-    # Scales the wave forces according to beam diameter
-    beamloadArray = dimentionizeLoadsOnBeams(beamArray, beamloadArray, IPELibrary, pipeLibrary)
-
     # Connects the distributed loads to the beam objects,
     # and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
-    beamsObjectList = connectDistributedNormalLoadsToBeamsAndCalculateFIM(beamsObjectList, beamloadArray, IPELibrary,
-                                                        pipeLibrary)
+    beamsObjectList = connectAndScaleDistributedLoadsAndCalculateFixedSupport(beamsObjectList, beamloadArray, loadScale)
 
     # Connects nodeloads to the nodes
     nodesObjectList = connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
@@ -49,23 +43,22 @@ def main():
     # Makes the Resulting Load Vector
     R = makeResultingLoadVector(nodesObjectList)
 
-    # Global stiffness matrix
+    # Global stiffness matrix with only zeros
     K = makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList)
 
     # Calculate the displacement vector
-    r = np.linalg.solve(K, R)
+    r = np.linalg.solve(K,R)
 
-    # This works for FixedBeam, and partly works for PortalFrame
     beamsObjectList = calculateBeamReactionForces(beamsObjectList, r)
+    beamsObjectList = calculateMaxMomentAndBendingTension(beamsObjectList)
 
-    printBeam(beamsObjectList)
-
+    printBeams(beamsObjectList)
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
-    # The plot only shows rotations, which is scaled by a factor of 30
-    plot(nodeArray,beamArray, r * 30)
+    # The plot only shows rotations, which is scaled by a factor of 20
+    plot(nodeArray,beamArray, r * 20)
 
-    return False
+    return 0
 
 
 main()
