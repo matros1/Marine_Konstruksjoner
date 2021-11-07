@@ -4,10 +4,7 @@ from plotVisualization import *
 from readTextToArray import *
 from structure_visualization import *
 
-
-# This file reads in all subfiles.
-# This is the command room, and here we controll the program.
-
+# This is the command room, here we controll the program.
 
 def main():
     # Reads some files and makes np arrays
@@ -54,11 +51,12 @@ def main():
 
     beamsObjectList = calculateBeamReactionForces(beamsObjectList, r)
     beamsObjectList = calculateMaxMomentAndBendingTension(beamsObjectList)
+
     printBeams(beamsObjectList)
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
-    # The plot only shows rotations, which is scaled by a factor of 60
-    plot(nodeArray,beamArray, r * 60)
+    # The plot only shows rotations, which is scaled by a factor of 20
+    plot(nodeArray,beamArray, r * 20)
 
     return 0
 
