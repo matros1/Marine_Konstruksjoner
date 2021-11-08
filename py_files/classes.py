@@ -80,13 +80,16 @@ class Beam:
 
         if dz != 0:
             if dx != 0:
-                theta_ref_global = -np.arctan(dz/dx)
+                theta_ref_global = -np.arctan2(dz,dx)
             elif self.z1 > self.z2:
                 theta_ref_global = np.pi / 2
             else:
                 theta_ref_global = -np.pi / 2
         else:
-            theta_ref_global = 0
+            if self.x1 < self.x2:
+                theta_ref_global = 0
+            else:
+                theta_ref_global = np.pi
         return theta_ref_global
 
     def getLength(self):
@@ -194,7 +197,7 @@ class Beam:
             load working on NODE1, and q2 for NODE2
             Note:   positive load is defined as upwards(positive z) in the beams local orientation
         '''
-        if(self.orientation == 0):
+        if(np.sin(self.orientation) == 0):
             self.q1 = load[2]
             self.q2 = load[4]
         elif(np.cos(self.orientation) == 0):
