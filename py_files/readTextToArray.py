@@ -1,67 +1,5 @@
 from importedLibraries import *
 
-def readCSV_float(filename):
-    '''
-    Reads from file and makes an float array of list elements.
-    :param filename: .txt file
-    :return: np.array() of flots
-    '''
-    f = open(filename,'r')
-    NODE = f.readlines()
-    for i,linje in enumerate(NODE):
-        NODE[i] = linje.split(',')
-    f.close()
-    return np.array(NODE, float)
-
-def readCSV_int(filename):
-    '''
-    Reads from file and makes an int array of list elements.
-    :param filename: .txt file
-    :return: np.array() of flots
-    '''
-    f = open(filename,'r')
-    NODE = f.readlines()
-    for i,linje in enumerate(NODE):
-        NODE[i] = linje.split(',')
-    f.close()
-    return np.array(NODE, int)
-
-
-def readAll():
-    '''
-    Reads nodedata, beamdata, materialdata, nodeloaddata and beamloaddata to np array.
-    :return: np array of nodedata, beamdata, materialdata, nodeloaddata and beamloaddata.
-    '''
-    NODE = readCSV_float("py_files/NodeData.txt")
-    # x, z, u, w, theta
-    # På u,w,theta er 1="Denne er ukjent, må tas med i matrisen", 0="Denne er 0"
-
-    BEAM = readCSV_int("py_files/BeamData.txt")
-    # N1, N2, M, G
-    # N1-Node lengst til venstre
-    # N2-Node lengst til høyre
-    #  M-Materiale, 1=stål, 2=aluminium
-    #  Geometri. 1 = pipe, 2 = IPE
-    #  Geometri utvalgt fra biblioteket
-
-    MATERIAL = readCSV_float("py_files/MaterialData.txt")
-    # E-modul, flytspenning, tverrkontraksjonstallet
-    # 1 er stål og 2 er aluminium
-
-    NODELOAD = readCSV_int("py_files/NodeLoadData.txt")
-    # Nodenr, Fx, Fz, My
-
-    BEAMLOAD = readCSV_int("py_files/BeamLoadData.txt")
-    # Beamnr, Fx1, Fz1, Fx2, Fz2
-
-    PipeData = readCSV_float("py_files/PipeData")
-    # radius, ratio air
-
-    IPEData = readCSV_float("py_files/IPEData")
-    #total height, width top, bottom, mid, thickness topp, bot
-
-    return NODE,BEAM,MATERIAL,NODELOAD,BEAMLOAD, PipeData, IPEData
-
 def readInputFile(filepath):
     '''
     Reads input file
@@ -78,18 +16,33 @@ def readInputFile(filepath):
         line = line.split(',')
         if line[0] == "NODE":
             NODE.append(line[1:])
+            # x, z, u, w, theta
+            # På u,w,theta er 1="Denne er ukjent, må tas med i matrisen", 0="Denne er ikke fastholdt"
+            # 2="Denne er fastholdt"
         elif line[0] == "BEAM":
             BEAM.append(line[1:])
+            # N1, N2, M, G, n
+            # N1-Node lengst til venstre
+            # N2-Node lengst til høyre
+            # M-Materiale, 1=stål, 2=aluminium
+            # Geometri. 2 = pipe, 1 = IPE
+            # n utvalgt fra biblioteket
         elif line[0] == "MATERIAL":
             MATERIAL.append(line[1:])
+            # E-modul, flytspenning
+            # 1 er stål og 2 er aluminium
         elif line[0] == "NODELOAD":
             NODELOAD.append(line[1:])
+            # Nodenr, Fx, Fz, My
         elif line[0] == "BEAMLOAD":
             BEAMLOAD.append(line[1:])
+            # Beamnr, Fx1, Fz1, Fx2, Fz2
         elif line[0] == "PIPE":
             PIPE.append(line[1:])
+            # outer radius, inner radius
         elif line[0] == "IPE":
             IPE.append(line[1:])
+            #total height, width, t_mid, t_f
         elif line[0] == "LOADSCALE":
             LOADSCALE = float(line[1].strip())
         elif line[0] == "---\n":

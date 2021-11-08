@@ -49,14 +49,24 @@ def main():
     # Calculate the displacement vector
     r = np.linalg.solve(K,R)
 
+    #Calculate reaction forces
     beamsObjectList = calculateBeamReactionForces(beamsObjectList, r)
-    beamsObjectList = calculateMaxMomentAndBendingTension(beamsObjectList)
 
+    #Calculate stress-levels and 
+    beamsObjectList = calculateMaxMomentAndTension(beamsObjectList)
+
+    # Print data to terminal 
     printBeams(beamsObjectList)
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
     # The plot only shows rotations, which is scaled by a factor of 20
     plot(nodeArray,beamArray, r * 20)
+
+    # Export data to txt-files
+    outputMomentsToFile('moments', beamsObjectList)
+    outputSheerToFile('sheer', beamsObjectList)
+    outputStressToFile('stress',beamsObjectList)
+    outputNormalForceToFile('normalForce', beamsObjectList)
 
     return 0
 

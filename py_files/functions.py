@@ -249,9 +249,32 @@ def printBeams(beamsObjectList, s = 0, n = 999999999):
         beamsObjectList[i+s].printBeamMoments()
         beamsObjectList[i+s].printSecurityFactor()
 
-def calculateMaxMomentAndBendingTension(beamsObjectList):
+def calculateMaxMomentAndTension(beamsObjectList):
     for i in range(len(beamsObjectList)):
         beamsObjectList[i].calculateMaxMoment()
         beamsObjectList[i].calculateMaxBendingTension()
     return beamsObjectList
 
+def outputMomentsToFile(filename, beamsObjectList):
+    f = open(filename+'.txt', 'w')
+    for beam in beamsObjectList:
+        f.write(f'Beam: {beam.number},\t M1: {round(beam.reactionForces[2])}[Nm], \t M2: {round(beam.reactionForces[5])}[Nm]\n')
+    f.close
+
+def outputSheerToFile(filename, beamsObjectList):
+    f = open(filename+'.txt', 'w')
+    for beam in beamsObjectList:
+        f.write(f'Beam: {beam.number},\t V1: {round(beam.reactionForces[1])}[N], \t V2: {round(beam.reactionForces[4])}[N]\n')
+    f.close
+
+def outputStressToFile(filename, beamsObjectList):
+    f = open(filename+'.txt', 'w')
+    for beam in beamsObjectList:
+        f.write(f'Beam: {beam.number},\t sigma_x: {round(beam.sigmax/10**6,2)}[MPa]\n')
+    f.close
+
+def outputNormalForceToFile(filename, beamsObjectList):
+    f = open(filename+'.txt', 'w')
+    for beam in beamsObjectList:
+        f.write(f'Beam: {beam.number},\t N: {round(beam.reactionForces[0])}[N]\n')
+    f.close
