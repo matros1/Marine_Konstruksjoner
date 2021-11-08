@@ -278,3 +278,9 @@ def outputNormalForceToFile(filename, beamsObjectList):
     for beam in beamsObjectList:
         f.write(f'Beam: {beam.number},\t N: {round(beam.reactionForces[0])}[N]\n')
     f.close
+
+def outputDataToFile(beamsObjectList):
+    outputMomentsToFile('moments', beamsObjectList)
+    outputSheerToFile('sheer', beamsObjectList)
+    outputStressToFile('stress',beamsObjectList)
+    outputNormalForceToFile('normalForce', beamsObjectList)

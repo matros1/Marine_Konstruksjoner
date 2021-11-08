@@ -17,8 +17,10 @@ def readInputFile(filepath):
         if line[0] == "NODE":
             NODE.append(line[1:])
             # x, z, u, w, theta
-            # På u,w,theta er 1="Denne er ukjent, må tas med i matrisen", 0="Denne er ikke fastholdt"
-            # 2="Denne er fastholdt"
+            # På u,w,theta er 
+            # 0 = "Denne er ikke fastholdt"
+            # 1 = "Denne er ukjent, må tas med i matrisen"
+            # 2 = "Denne er fastholdt"
         elif line[0] == "BEAM":
             BEAM.append(line[1:])
             # N1, N2, M, G, n

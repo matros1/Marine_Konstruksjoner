@@ -63,10 +63,7 @@ def main():
     plot(nodeArray,beamArray, r * 20)
 
     # Export data to txt-files
-    outputMomentsToFile('moments', beamsObjectList)
-    outputSheerToFile('sheer', beamsObjectList)
-    outputStressToFile('stress',beamsObjectList)
-    outputNormalForceToFile('normalForce', beamsObjectList)
+    outputDataToFile(beamsObjectList)
 
     return 0
 
