@@ -40,7 +40,7 @@ def makeBeamsGeometry(beamList, beamsObjectList, pipeLibrary, IPELibrary):
         if beamList[i][3] == 1:  # If beam geometry is IPE
             k = int(beamList[i][4] - 1)
             beam.makeIPE(IPELibrary[k][0], IPELibrary[k][1], IPELibrary[k][2],
-                         IPELibrary[k][3], IPELibrary[k][4], IPELibrary[k][5])
+                         IPELibrary[k][3])
             # hight, w top, w bot, w mid, t top, t bot
         elif beamList[i][3] == 2:  # If beam geometry is pipe
             k = int(beamList[i][4] - 1)

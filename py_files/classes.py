@@ -38,7 +38,7 @@ class Beam:
         self.diameter = 2*r
         self.Zc = r
 
-    def makeIPE(self,H,w_top,w_bot,w_mid,t_top,t_bot):
+    def makeIPE(self,H, b,t_mid,t_f):
         '''
         Turns the beam object into a IPE profle,
         and calculates corresponding area and moment of inertia.
@@ -50,24 +50,21 @@ class Beam:
         :param t_bot: thickness bottom
         :return: applies area and moment of inertia to the beam.
         '''
-        Atop = w_top*t_top
-        Abot = w_bot*t_bot
-        Amid = (H-t_top-t_bot)*w_mid
+        A_f = b * t_f
+        Amid = (H - 2 * t_f) * t_mid
 
-        self.Zc = (Atop*(H - t_top/2) + Amid*((H-t_top-t_bot)/2 + t_bot) + Abot*t_bot/2)/(Atop + Amid + Abot)
+        I_f= b * t_f**3 / 12
+        Imid = (H- 2 * t_f)**3 * t_mid / 12
 
-        Itop = w_top * t_top**3 / 12
-        Ibot = w_bot * t_bot ** 3 / 12
-        Imid = (H-t_top-t_bot)**3 * w_mid / 12
-
-        area = Atop + Abot + Amid
-        momInertiaStrong = Itop + Ibot + Imid + Atop*(H - t_top/2 - self.Zc)**2 + Amid*((H-t_top-t_bot)/2 + t_bot - self.Zc)**2 + Abot*(t_bot/2 - self.Zc)**2
-        momInertiaWeak = (w_top**3*t_top + w_mid**3 * (H-t_top-t_bot) + w_bot**3 * t_bot)/12
+        area = 2 * A_f + Amid
+        momInertiaStrong = 2 * I_f + Imid + 2 * A_f * (H/2 - t_f/2)**2
+        momInertiaWeak = 2 * b**3 * t_f + t_mid**3 * (H - 2 * t_f)
 
         self.area = area
         self.momentOfInertiaStrong = momInertiaStrong
         self.momentOfInertiaWeak = momInertiaWeak
-        self.diameter = max([w_top, w_bot])
+        self.diameter = b
+        self.Zc = H / 2
 
     def getGlobalOrientation(self):
         '''
@@ -264,9 +261,9 @@ class Beam:
 
     def calculateMaxBendingTension(self):
         try:
-            self.sigmax = max([abs(self.reactionForces[2]), abs(self.M_R), abs(self.reactionForces[5])])*self.Zc/self.momentOfInertiaStrong
+            self.sigmax = max([abs(self.reactionForces[2]), abs(self.M_R), abs(self.reactionForces[5])])*self.Zc/self.momentOfInertiaStrong + abs(self.reactionForces[0])/self.area
         except AttributeError:
-            self.sigmax = max([abs(self.reactionForces[2]), abs(self.reactionForces[5])])*self.Zc/self.momentOfInertiaStrong
+            self.sigmax = max([abs(self.reactionForces[2]), abs(self.reactionForces[5])])*self.Zc/self.momentOfInertiaStrong + abs(self.reactionForces[0])/self.area
         self.securityFactor = self.sigmax/self.sigmafy
 
     def printSecurityFactor(self):
