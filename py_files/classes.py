@@ -298,10 +298,12 @@ class Beam:
         :return: nothing
         '''
         try:
-            self.sigmax = max([abs(self.reactionForces[2]), abs(self.M_R), abs(self.reactionForces[5])])*self.Zc/self.momentOfInertiaStrong + abs(self.reactionForces[0])/self.area
+            self.sigmax = max([abs(self.reactionForces[2]), abs(self.M_R),
+                               abs(self.reactionForces[5])]) * self.Zc / self.momentOfInertiaStrong
         except AttributeError:
-            self.sigmax = max([abs(self.reactionForces[2]), abs(self.reactionForces[5])])*self.Zc/self.momentOfInertiaStrong + abs(self.reactionForces[0])/self.area
-        self.securityFactor = self.sigmax/self.sigmafy
+            self.sigmax = max(
+                [abs(self.reactionForces[2]), abs(self.reactionForces[5])]) * self.Zc / self.momentOfInertiaStrong
+        self.securityFactor = self.sigmax / self.sigmafy
 
     def printSecurityFactor(self):
         '''

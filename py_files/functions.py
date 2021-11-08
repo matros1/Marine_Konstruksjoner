@@ -33,10 +33,10 @@ def initializeNodesAndBeamsList(nodeArray, beamArray):
     return nodesObjectList, beamsObjectList
 
 
-def makeBeamsGeometry(beamList, beamsObjectList, pipeLibrary, IPELibrary):
+def makeBeamsGeometry(beamArray, beamsObjectList, pipeLibrary, IPELibrary):
     '''
     Decides from the input file which geometry to add to each beam object
-    param beamList: matrix containing beam-data from input file
+    param beamArray: matrix containing beam-data from input file
     param beamsObjectList: list containing all beam-objects
     param pipeLibrary: matrix containing pipe-data from input file
     param IPELibrary: matrix containing IPE-data from input file
@@ -44,13 +44,13 @@ def makeBeamsGeometry(beamList, beamsObjectList, pipeLibrary, IPELibrary):
     '''
     i = 0
     for beam in beamsObjectList:
-        if beamList[i][3] == 1:  # If beam geometry is IPE
-            k = int(beamList[i][4] - 1)
+        if beamArray[i][3] == 1:  # If beam geometry is IPE
+            k = int(beamArray[i][4] - 1)
             beam.makeIPE(IPELibrary[k][0], IPELibrary[k][1], IPELibrary[k][2],
                          IPELibrary[k][3])
             # hight, w top, w bot, w mid, t top, t bot
-        elif beamList[i][3] == 2:  # If beam geometry is pipe
-            k = int(beamList[i][4] - 1)
+        elif beamArray[i][3] == 2:  # If beam geometry is pipe
+            k = int(beamArray[i][4] - 1)
             beam.makePipe(pipeLibrary[k][0], pipeLibrary[k][1])
             # arguments: radius, ratio air
 
