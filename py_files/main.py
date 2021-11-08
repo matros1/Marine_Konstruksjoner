@@ -9,8 +9,8 @@ from structure_visualization import *
 def main():
     # Reads some files and makes np arrays
     nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, loadScale= readInputFile("InputDataJacket.txt")
-    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataFixedBeam.txt")
-    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary = readInputFile("InputDataPortalFrame.txt")
+    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, loadScale = readInputFile("InputDataFixedBeam.txt")
+    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, loadScale = readInputFile("InputDataPortalFrame.txt")
 
     # Inizializes beams and nodes objects and appends to list.
     nodesObjectList, beamsObjectList = initializeNodesAndBeamsList(nodeArray, beamArray)

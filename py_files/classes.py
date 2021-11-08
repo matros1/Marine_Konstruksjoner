@@ -80,13 +80,16 @@ class Beam:
 
         if dz != 0:
             if dx != 0:
-                theta_ref_global = -np.arctan(dz / dx)
+                theta_ref_global = -np.arctan2(dz,dx)
             elif self.z1 > self.z2:
                 theta_ref_global = np.pi / 2
             else:
                 theta_ref_global = -np.pi / 2
         else:
-            theta_ref_global = 0
+            if self.x1 < self.x2:
+                theta_ref_global = 0
+            else:
+                theta_ref_global = np.pi
         return theta_ref_global
 
     def getLength(self):
@@ -194,15 +197,15 @@ class Beam:
             load working on NODE1, and q2 for NODE2
         Note:   positive load is defined as upwards(positive z) in the beams local orientation
         '''
-        if (self.orientation == 0):
+        if(np.sin(self.orientation) == 0):
             self.q1 = load[2]
             self.q2 = load[4]
-        elif (np.cos(self.orientation) == 0):
+        elif(np.cos(self.orientation) == 0):
             self.q1 = load[1]
             self.q2 = load[3]
         else:
-            self.q1 = load[1] / np.sin(self.orientation) + load[2] / np.cos(self.orientation)
-            self.q2 = load[3] / np.sin(self.orientation) + load[4] / np.cos(self.orientation)
+            self.q1 = load[1]/np.sin(self.orientation) + load[2]/np.cos(self.orientation)
+            self.q2 = load[3]/np.sin(self.orientation) + load[4]/np.cos(self.orientation)
 
     def calculateFixedSupport(self):
         '''
@@ -210,8 +213,8 @@ class Beam:
         Adds Fixed Support to the nodes affected
         Based on table found in "TMR4167 Marin teknikk 2 – Konstruksjoner - Del 1", page 281
         '''
-        m1 = (1 / 20) * self.q1 * (self.length) ** 2 + (1 / 30) * self.q2 * (self.length) ** 2
-        m2 = -(1 / 30) * self.q1 * (self.length) ** 2 - (1 / 20) * self.q2 * (self.length) ** 2
+        m1 = (1/20)*self.q1*(self.length)**2 + (1/30)*self.q2*(self.length)**2
+        m2 = -(1/30)*self.q1*(self.length)**2 - (1/20)*self.q2*(self.length)**2
 
         self.node1.M += m1
         self.node2.M += m2
@@ -234,11 +237,11 @@ class Beam:
             string += f'w{i+1}: {round(self.localDisplacements[i*3+1],4)} \tV{i+1}: {round(self.reactionForces[i*3 + 1],2)}\n'
             string += f'ø{i+1}: {round(self.localDisplacements[i*3+2],4)} \tM{i+1}: {round(self.reactionForces[i*3 + 2],2)}\n'
         print(string)
-
+    
     def scaleDistributedLoad(self, base):
             self.q1 *= self.diameter/base
             self.q2 *= self.diameter/base
-
+    
     def calculateMaxMoment(self):
         try:
             #Max moment where sheer = 0, and where the resultant force of the distributed load attacks
@@ -248,7 +251,7 @@ class Beam:
                 self.M_R = -self.reactionForces[2]-self.reactionForces[1]*self.L_R - (self.q1*self.L_R**2)/2 - (q_R - self.q1)*(self.L_R**2)/6
             else:
                 self.M_R = -self.reactionForces[2]-self.reactionForces[1]*self.L_R - (q_R*self.L_R**2)/2 - (self.q1 - q_R)*(self.L_R**2)/3
-
+       
         except AttributeError:
             pass
 
@@ -275,21 +278,20 @@ class Node:
     data about displacements and fixed clamping forces and moments
     We use this to create the R-vector.
     '''
-
     def __init__(self, x, z, u, w, ø):
-        # Coordinates
+        #Coordinates
         self.x = x
         self.z = z
-        # Displacements and rotations
+        #Displacement and rotation conditions
         self.u = u
         self.w = w
         self.ø = ø
-        # Fixed Clamping Forces and Moment
+        #Fixed Clamping Forces and Moment
         self.Fx = 0
         self.Fz = 0
         self.M = 0
 
-    def giveNumber(self, nodeNumber):
+    def giveNumber(self,nodeNumber):
         '''
         Enumerates the node. Not sure if we will use this or not.
         :param nodeNumber: number of node
