@@ -1,70 +1,88 @@
+'''
+Developed by Matias Rosenlund, Christian Lindahl Elseth og Hugo Furnes
+Norwegian University of Science and Technology, Department of Marine Technology
+08.11.2021 as part of TMR4167 Marin teknikk - Konstruksjoner
+'''
+
 # Imports sub python files
 from functions import *
 from plotVisualization import *
 from readTextToArray import *
 from structure_visualization import *
 
-# This is the command room, here we controll the program.
+
+# This is the command room, here we control the program.
 
 def main():
-    # Reads some files and makes np arrays
-    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, loadScale= readInputFile("InputDataJacket.txt")
-    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, loadScale = readInputFile("InputDataFixedBeam.txt")
-    #nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, loadScale = readInputFile("InputDataPortalFrame.txt")
+    # Reads from inputfile and sorts the data in appropriate numpy arrays.
+    nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, referenceDiameter = readInputFile(
+        "InputDataJacket.txt")
 
-    # Inizializes beams and nodes objects and appends to list.
+    # Initialize beams and nodes objects and appends to list.
     nodesObjectList, beamsObjectList = initializeNodesAndBeamsList(nodeArray, beamArray)
 
-    # Uses spesifications from text files to create correct geometry for each beam.
+    # Uses specifications from input files to create geometry for each beam.
     beamsObjectList = makeBeamsGeometry(beamArray, beamsObjectList, pipeLibrary, IPELibrary)
 
-    # Gives correct E modulus to each beam.
-    beamsObjectList = giveEmodulToBeams(beamsObjectList, materialArray, beamArray)
+    # Gives correct Young's modulus to each beam.
+    beamsObjectList = giveYoungsModulusToBeams(beamsObjectList, materialArray, beamArray)
 
-    # Enumerates beams
+    # Enumerates each beam.
     beamsObjectList = giveNumberToObjects(beamsObjectList)
 
-    # Enumerates nodes
+    # Enumerates each node.
     nodesObjectList = giveNumberToObjects(nodesObjectList)
 
-    # Creates the local stiffness matrix of each beam.
+    # Creates the local stiffness matrix for each beam.
     beamsObjectList = giveLocalStiffnessMatrixToBeamsLocalOrientation(beamsObjectList)
 
-    # Orients the local stiffness matrix to global coordinates
+    # Orients the local stiffness matrix to global coordinates for each beam.
     beamsObjectList = giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList)
 
-    # Connects the distributed loads to the beam objects,
-    # and calculates Fixed Clamping Moment (FastInnspenningsmomenter) for each beam affected by the distributed loads
-    beamsObjectList = connectAndScaleDistributedLoadsAndCalculateFixedSupport(beamsObjectList, beamloadArray, loadScale)
+    # Connects distributed loads to corresponding beams.
+    beamsObjectList = addDistributedLoadsToBeam(beamsObjectList, beamloadArray)
 
-    # Connects nodeloads to the nodes
+    # Scale distributed loads with respect to reference diameter.
+    beamsObjectList = scaleDistributedBeamLoads(beamsObjectList, referenceDiameter)
+
+    # Calculates fixed support moment and forces for each beam.
+    beamsObjectList = calculateFixedSupportMomentAndForces(beamsObjectList)
+
+    # Connects node loads to corresponding nodes.
     nodesObjectList = connectNodeLoadsToNodes(nodesObjectList, nodeloadArray)
 
-    # Makes the Resulting Load Vector
-    R = makeResultingLoadVector(nodesObjectList)
+    # Makes the resulting load vector.
+    resultingLoadVector = makeResultingLoadVector(nodesObjectList)
 
-    # Global stiffness matrix with only zeros
-    K = makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList)
+    # Makes the global stiffness matrix.
+    globalStiffnessMatrix = makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList)
 
-    # Calculate the displacement vector
-    r = np.linalg.solve(K,R)
+    # Uses numpy.linalg.solve() to solve the system relation for the global displacement vector.
+    globalDisplacementVector = np.linalg.solve(globalStiffnessMatrix, resultingLoadVector)
 
-    #Calculate reaction forces
-    beamsObjectList = calculateBeamReactionForces(beamsObjectList, r)
+    # Calculates reaction forces for each beam.
+    beamsObjectList = calculateBeamReactionForces(beamsObjectList, globalDisplacementVector)
 
-    #Calculate stress-levels and 
+    # Calculates max moment and bending tension for each beam.
     beamsObjectList = calculateMaxMomentAndTension(beamsObjectList)
 
-    # Print data to terminal 
-    printBeams(beamsObjectList)
+    # Prints specifications for each beam to terminal for debugging.
+    printBeamSpecsToTerminal(beamsObjectList)
+
+    # Makes and plots moment diagrams.
+    printMomentDiagram(beamsObjectList)
 
     # Plots. Here we use the imported library structure visualization to visualize our frame.
     # The plot only shows rotations, which is scaled by a factor of 20
-    plot(nodeArray,beamArray, r * 20)
+
+    # The handed out code structure_visualization.py is altered to match our code and used to plot our jacket
+    # construction. Displacements er scaled by 20.
+    plot(nodeArray, beamArray, globalDisplacementVector * 20)
 
     # Export data to txt-files
     outputDataToFile(beamsObjectList)
 
     return 0
+
 
 main()

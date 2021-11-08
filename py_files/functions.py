@@ -1,26 +1,34 @@
+'''
+Developed by Matias Rosenlund, Christian Lindahl Elseth og Hugo Furnes
+Norwegian University of Science and Technology, Department of Marine Technology
+08.11.2021 as part of TMR4167 Marin teknikk - Konstruksjoner
+'''
+
+
 from classes import *
 from importedLibraries import *
 
 
-# Funksjoner
+# This file includes relevant functions.
 
 def initializeNodesAndBeamsList(nodeArray, beamArray):
     '''
-    Makes and initializes the object lists, for both beams and nodes
-    param nodeArray: matrix containing node-data from inputfile
-    param beamArray: matrix containing beam-data from inputfile
-    return: Objectlists for beams and nodes
+    Makes and initializes the beams and nodes object lists
+    param nodeArray: matrix containing node-data from input file
+    param beamArray: matrix containing beam-data from input file
+    return: Object lists for nodes, beams
     '''
     nodesObjectList = []
     beamsObjectList = []
 
     for i in range(len(nodeArray)):
-        nodesObjectList.append(Node(nodeArray[i][0], nodeArray[i][1], nodeArray[i][2], nodeArray[i][3], nodeArray[i][4]))
+        nodesObjectList.append(
+            Node(nodeArray[i][0], nodeArray[i][1], nodeArray[i][2], nodeArray[i][3], nodeArray[i][4]))
 
     for j in range(len(beamArray)):
-        N1 = nodesObjectList[int(beamArray[j][0]) - 1]
-        N2 = nodesObjectList[int(beamArray[j][1]) - 1]
-        beamsObjectList.append(Beam(N1, N2))
+        node1 = nodesObjectList[int(beamArray[j][0]) - 1]
+        node2 = nodesObjectList[int(beamArray[j][1]) - 1]
+        beamsObjectList.append(Beam(node1, node2))
 
     return nodesObjectList, beamsObjectList
 
@@ -32,10 +40,9 @@ def makeBeamsGeometry(beamList, beamsObjectList, pipeLibrary, IPELibrary):
     param beamsObjectList: list containing all beam-objects
     param pipeLibrary: matrix containing pipe-data from input file
     param IPELibrary: matrix containing IPE-data from input file
-    return: new beamsObjectList with added geometry added to the beams
+    return: Beams object list
     '''
     i = 0
-    TempBeamsList = []
     for beam in beamsObjectList:
         if beamList[i][3] == 1:  # If beam geometry is IPE
             k = int(beamList[i][4] - 1)
@@ -48,60 +55,99 @@ def makeBeamsGeometry(beamList, beamsObjectList, pipeLibrary, IPELibrary):
             # arguments: radius, ratio air
 
         i += 1
-        TempBeamsList.append(beam)
 
-    return TempBeamsList
+    return beamsObjectList
 
 
-def giveEmodulToBeams(beamsObjectList, materialArray, beamData):
+def giveYoungsModulusToBeams(beamsObjectList, materialArray, beamArray):
+    '''
+    This function appends Young's modulus to elements
+    :param beamsObjectList: List of beam objects
+    :param materialArray: Library of materials
+    :param beamArray: Array of beam data from input file
+    :return: Beams object list
+    '''
     i = 0
-    TempBeamsList = []
     for beam in beamsObjectList:
-        k = int(beamData[i][2] - 1)
-        beam.makeStiffness(materialArray[k])
-        TempBeamsList.append(beam)
+        materialType = int(beamArray[i][2] - 1)
+        # Matrial array includes aluminium and steel
+        beam.makeStiffness(materialArray[materialType])
         i += 1
 
-    return TempBeamsList
+    return beamsObjectList
 
 
 def giveNumberToObjects(objectList):
+    '''
+    Enumerates objects in a list
+    :param objectList: A list of objects, can be both nodes and beams
+    :return: A list of objects
+    '''
     for i in range(len(objectList)):
         objectList[i].giveNumber(i + 1)
     return objectList
 
 
 def giveLocalStiffnessMatrixToBeamsLocalOrientation(beamsObjectList):
-    for i in range(len(beamsObjectList)):
-        beamsObjectList[i].makeLocalStiffnessMatrix()
+    '''
+    Uses the Beam member function makeLocalStiffnessMatrix() to make a local stiffness
+    matrix to each beam in the list of beam objects
+    :param beamsObjectList: A list of beam objects
+    :return: A list of beam objects
+    '''
+    for beam in beamsObjectList:
+        beam.makeLocalStiffnessMatrix()
     return beamsObjectList
 
 
 def giveLocalStiffnessMatrixToBeamsGlobalOrientation(beamsObjectList):
+    '''
+    Transforms the element stiffness matrix.
+    :param beamsObjectList: A list of beam objects
+    :return: A list of beam objects
+    '''
     for i in range(len(beamsObjectList)):
-        beamsObjectList[i].makeTransformedStiffnessMatrix()
+        beamsObjectList[i].transformElementStiffnessMatrix()
     return beamsObjectList
 
 
-def connectAndScaleDistributedLoadsAndCalculateFixedSupport(beamsObjectList, beamloadArray, base = 1):
+def addDistributedLoadsToBeam(beamsObjectList, beamloadArray):
     '''
-    Connects the distributed loads to the beam objects,
-        and calculates Fixed Clamping Moment (FastInnspenningsmomenter)
-        for each beam affected by the distributed loads
-    :param beamsObjectList: list of all Beam-objects
-    :param beamloadArray: np array of all distributed loads
-    :return: uses member funtion Beam.addDistributedLoad(beamload),
-        where beamload is a list with data for the distributed load
-        also uses member function Beam.FixedSupport()
+    Adds distributed loads from input file to beam objects
+    :param beamsObjectList: A list of beam objects
+    :param beamloadArray: An array of beam loads
+    :return: A list of beam objects
     '''
     for i in range(len(beamloadArray)):
-        for j in range(len(beamsObjectList)):
-            if (beamsObjectList[j].number == beamloadArray[i][0]):
-                beamsObjectList[j].addDistributedNormalLoad(beamloadArray[i])
-                beamsObjectList[j].scaleDistributedLoad(base)
-                beamsObjectList[j].calculateFixedSupport()
+        for beam in beamsObjectList:
+            if (beam.number == beamloadArray[i][0]):
+                beam.addDistributedNormalLoad(beamloadArray[i])
     return beamsObjectList
-    
+
+
+def scaleDistributedBeamLoads(beamsObjectList, referenceDiameter):
+    '''
+    Scales distributed loads on beam objects according to their diameter with respect
+    to the reference diameter.
+    :param beamsObjectList: A list of beam objects
+    :param referenceDiameter: A reference diameter
+    :return: A list of beam objects
+    '''
+    for beam in beamsObjectList:
+        beam.scaleDistributedLoad(referenceDiameter)
+    return beamsObjectList
+
+
+def calculateFixedSupportMomentAndForces(beamsObjectList):
+    '''
+    Calculates the each beam's fixed support moment and forces at both ends.
+    :param beamsObjectList: A list of beam objects
+    :return: A list of beam objects
+    '''
+    for beam in beamsObjectList:
+        beam.calculateFixedSupport()
+    return beamsObjectList
+
 
 def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
     '''
@@ -146,32 +192,31 @@ def getMomentFromTriangleLoad(q1, q2, L):
 
 def makeResultingLoadVector(nodesObjectList):
     '''
-    Makes list of Fixed Clamping Forces and Vectors
-    K*r = R
-    K: Global Stiffness Matrix
-    r: Displacement vector
-    R: Loadvector
+    Makes a list of fixed support forces and moments that satisfy
+    the system relation, K*r = R.
+    :param nodesObjectList: A list of nodes
+    :return: An 1x3n array
     '''
     R = []
     for i in range(len(nodesObjectList)):
-        R.append(-nodesObjectList[i].Fx)    # u
-        R.append(-nodesObjectList[i].Fz)    # w
-        R.append(-nodesObjectList[i].M)     # ø
+        R.append(-nodesObjectList[i].Fx)  # u
+        R.append(-nodesObjectList[i].Fz)  # w
+        R.append(-nodesObjectList[i].M)  # ø
     return np.array(R)
 
 
 def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
     '''
-    Makes the global stiffnessmatrix by adding the transformed stiffnessmatrix for
-    each beam into the global, in position given by the nodes each beam is connected to.
-    We then account for fixing point coditions (opplagerbetingelser)
-    param beamsObjectList: List of all beam-objects
-    param nodesObjectList: List of all node-objects
-    return: Global stiffness-matrix
+    Makes the global stiffness matrix by adding each beams transformed stiffness matrix in position
+    given by the nodes each beam is connected to.
+    We then account for fixed support conditions.
+    param beamsObjectList: List of beam objects
+    param nodesObjectList: List of node objects
+    return: Global stiffness matrix, 3n x 3n
     '''
-    M = np.zeros((3*len(nodesObjectList), 3*len(nodesObjectList)))
+    M = np.zeros((3 * len(nodesObjectList), 3 * len(nodesObjectList)))
 
-    #Make stiffnessmatrix
+    # Make stiffness matrix
     for beam in beamsObjectList:
         n1 = beam.node1.number - 1
         n2 = beam.node2.number - 1
@@ -183,35 +228,35 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
                 M[n1 * 3 + i][n2 * 3 + j] += K[i][3 + j]
                 M[n2 * 3 + i][n1 * 3 + j] += K[3 + i][j]
 
-    #Account for fixing point conditions
-    for n,node in enumerate(nodesObjectList):
+    # Account for fixed support conditions
+    for n, node in enumerate(nodesObjectList):
         for k in range(3):
             if k == 0:
-                displacement = node.u
+                displacement = node.supportX
             elif k == 1:
-                displacement = node.w
+                displacement = node.supportZ
             elif k == 2:
-                displacement = node.ø
+                displacement = node.supportTheta
 
-            if displacement == 1: # Do nothing
+            if displacement == 1:  # Do nothing
                 pass
-            elif displacement == 2: # Multiply diagonal with 10^6
-                M[n * 3 + k][n *3 + k] = M[n * 3 + k][n * 3 + k]*10**6
-            elif displacement == 0: # Make diagonal 1, rest of row/collumn 0
+            elif displacement == 2:  # Multiply diagonal with 10^6
+                M[n * 3 + k][n * 3 + k] = M[n * 3 + k][n * 3 + k] * 10 ** 6
+            elif displacement == 0:  # Make diagonal 1, rest of row/collumn 0
                 for l in range(len(nodesObjectList)):
                     M[n * 3 + k][l] = 0
                     M[l][n * 3 + k] = 0
-                M[n * 3 + k][n * 3 + k] = 1
-    #print(M)
+                M[n + k][n + k] = 1
+
     return M
+
 
 def calculateBeamReactionForces(beamsObjectList, r):
     '''
-    NB!! This works for FixedBeam, and partly works for PortalFrame
-    Calculates the beams reaction forces and moments
-    param beamsObjectList: List of all beam-objects
-    param r: vector containing all displacements
-    return: adds the reactionforces as member-variables to each beam and returns beamsObjectList
+    Calculates beams reaction force and adds these as member-variables to each beam
+    param beamsObjectList: List of beam objects
+    param r: Array containing resulting loads
+    return: A list of beam objects
     '''
     for beam in beamsObjectList:
         localDisplacements = np.zeros(6)
@@ -223,33 +268,41 @@ def calculateBeamReactionForces(beamsObjectList, r):
         beam.localDisplacements = np.matmul(beam.T_transponent, localDisplacements)
         beam.reactionForces = np.matmul(beam.localStiffnessMatrix, beam.localDisplacements)
         try:
-            m1 = (1/20)*beam.q1*(beam.length)**2 + (1/30)*beam.q2*(beam.length)**2
-            m2 = -(1/30)*beam.q1*(beam.length)**2 - (1/20)*beam.q2*(beam.length)**2
+            m1 = (1 / 20) * beam.q1 * (beam.length) ** 2 + (1 / 30) * beam.q2 * (beam.length) ** 2
+            m2 = -(1 / 30) * beam.q1 * (beam.length) ** 2 - (1 / 20) * beam.q2 * (beam.length) ** 2
 
-            v2 = (m1 + m2 - (beam.q1*beam.length**2)/6 - (beam.q2*beam.length**2)/3)/beam.length
-            v1 = -(beam.length/2)*(beam.q1 + beam.q2) - v2
+            v2 = (m1 + m2 - (beam.q1 * beam.length ** 2) / 6 - (beam.q2 * beam.length ** 2) / 3) / beam.length
+            v1 = -(beam.length / 2) * (beam.q1 + beam.q2) - v2
 
-            beam.reactionForces += np.array([0,v1,m1,0,v2,m2], dtype=float)
+            beam.reactionForces += np.array([0, v1, m1, 0, v2, m2], dtype=float)
         except AttributeError:
             pass
     return beamsObjectList
 
 
-def printBeams(beamsObjectList, s = 0, n = 999999999):
+def printBeamSpecsToTerminal(beamsObjectList, s=0, n=999999999):
     '''
-    prints the Reactionforces for each beam
-    param beamsObjectList: list of all the beam-objects
-    param n: if n is given, the function will print forces of the n first beams, else, print for all beams
-    return: prints to console
+    Prints the reaction forces for each beam. This is mostly used for debugging.
+    :param beamsObjectList:
+    :param s: A list of beam objects
+    :param n: if n is given, the function will print forces of the n first beams, else, print for all beams
+    :return: prints to console
     '''
-    if n > len(beamsObjectList)-s:
-        n = len(beamsObjectList)-s
+
+    if n > len(beamsObjectList) - s:
+        n = len(beamsObjectList) - s
     for i in range(n):
-        beamsObjectList[i+s].printBeam()
-        beamsObjectList[i+s].printBeamMoments()
-        beamsObjectList[i+s].printSecurityFactor()
+        beamsObjectList[i + s].printBeam()
+        beamsObjectList[i + s].printBeamMoments()
+        beamsObjectList[i + s].printSecurityFactor()
+
 
 def calculateMaxMomentAndTension(beamsObjectList):
+    '''
+    Calculates max moment and bending tension.
+    :param beamsObjectList: A list of beam objects
+    :return: Nothing
+    '''
     for i in range(len(beamsObjectList)):
         beamsObjectList[i].calculateMaxMoment()
         beamsObjectList[i].calculateMaxBendingTension()
@@ -284,3 +337,91 @@ def outputDataToFile(beamsObjectList):
     outputSheerToFile('sheer', beamsObjectList)
     outputStressToFile('stress',beamsObjectList)
     outputNormalForceToFile('normalForce', beamsObjectList)
+
+
+#Saved for later
+
+
+def getMomentDiagram(L, M1, V1, q1, q2, N):
+    X = np.linspace(0, L, N + 1)
+    dx = L / N
+    momentList = []
+
+    # for i in range(N + 1):
+    #     m1 = q1 * (i * dx) / (6 * L) * (2 * L * L - 3 * L * (i * dx) + (i * dx) ** 2)
+    #     m2 = q2 * (L - i * dx) / (6 * L) * (2 * L * L - 3 * L * (L - i * dx) + (L - i * dx) ** 2)
+    #     momentList.append(-M1 + m1 + m2)
+
+    # for j in range(N + 1):
+    #     x = j * dx
+    #     qs = q1 * (1 - x / L) + q1 * x / L
+    #
+    #     if (q2 > q1):
+    #         ms = - M1 - V1*x + (-q1 * x ** 2) / 2 + (-q2 + q1) * (x ** 2) * 2/ (3 * L)
+    #     else:
+    #         ms = - M1 - V1*x + (-q2 * x ** 2) / 2 + (-q1+q2)*(1-x/L)*(x ** 2)/3 - (q1-q2)*x**2/6
+    #     momentList.append(ms)
+
+    for j in range(N+1):
+        x = j * dx
+        qs = q1 * (1 - x / L) + q1 * x / L
+
+        if (q2 > q1):
+            ms = - M1 - V1 * x + (-q1 * x ** 2) / 2 + (-qs + q1) * (x ** 2) / (6)
+        else:
+            ms = - M1 - V1 * x + (-qs * x ** 2) / 2 + (-q1 + qs) * (x ** 2) / 3
+        momentList.append(ms)
+
+    return np.array(X), np.array(momentList)
+
+
+def printMomentDiagram(beamsObjectList):
+    '''
+    Prints a moment diagram to screen for each beam exposed to a distributed load.
+    :param beamsObjectList: A list of beam objects
+    :return: nothing
+    '''
+    N = 100
+    Micro = 10 ** -6
+
+    plotList = []
+    tempBeamList = []
+    for beam in beamsObjectList:
+        try:
+
+            plotList.append(getMomentDiagram(beam.length, beam.reactionForces[2], beam.reactionForces[1], beam.q1, beam.q2, N))
+            tempBeamList.append(beam)
+            print(beam.q1, beam.q2, beam.reactionForces[2], beam.reactionForces[5], beam.reactionForces[1])
+        except AttributeError:
+            pass
+
+    for i in range(len(plotList)):
+        plt.figure(i)
+        plt.plot(plotList[i][0], plotList[i][1] * Micro, c='r', label='M(x)')
+        plt.xlabel('x [ m ]')
+        plt.ylabel('Moment [ MNm ]')
+        plt.title('Bending moment diagram for element ' + str(tempBeamList[i].number))
+        plt.grid()
+
+        plt.plot()
+        if (plotList[i][1][0] < 0):
+            maxValue = np.max(plotList[i][1])
+            iMax = np.argmax(plotList[i][1])
+        else:
+            maxValue = np.min(plotList[i][1])
+            iMax = np.argmin(plotList[i][1])
+        xMax = iMax * tempBeamList[i].length / N
+        maxValueMNm = maxValue * Micro
+        startValueMNm = plotList[i][1][0] * Micro
+        endValueMNm = plotList[i][1][-1] * Micro
+        plt.plot(xMax, maxValueMNm, 'o', c='black',
+                 label='Extream value = ' + str(round(maxValueMNm, 2)) + ' MNm at ' + str(round(xMax, 2)) + ' m')
+        plt.plot(plotList[i][0][0], startValueMNm, 'o', c='blue',
+                 label='Start value = ' + str(round(startValueMNm, 2)) + ' MNm at ' + str(
+                     round(plotList[i][0][0], 2)) + ' m')
+        plt.plot(plotList[i][0][-1], endValueMNm, 'o', c='blue',
+                 label='End value = ' + str(round(endValueMNm, 2)) + ' MNm at ' + str(
+                     round(plotList[i][0][-1], 2)) + ' m')
+        plt.legend()
+
+    plt.show()
