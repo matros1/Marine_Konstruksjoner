@@ -78,7 +78,8 @@ class Beam:
         self.diameter = 2 * r
         self.Zc = r
 
-    def makeIPE(self, H, b, t_mid, t_f):
+
+    def makeIPE(self,H, b,t_mid,t_f):
         '''
         Turns the beam object into a IPE profle,
         and calculates corresponding area and moment of inertia.
@@ -93,12 +94,12 @@ class Beam:
         A_f = b * t_f
         Amid = (H - 2 * t_f) * t_mid
 
-        I_f = b * t_f ** 3 / 12
-        Imid = (H - 2 * t_f) ** 3 * t_mid / 12
+        I_f= b * t_f**3 / 12
+        Imid = (H- 2 * t_f)**3 * t_mid / 12
 
         area = 2 * A_f + Amid
-        momInertiaStrong = 2 * I_f + Imid + 2 * A_f * (H / 2 - t_f / 2) ** 2
-        momInertiaWeak = 2 * b ** 3 * t_f + t_mid ** 3 * (H - 2 * t_f)
+        momInertiaStrong = 2 * I_f + Imid + 2 * A_f * (H/2 - t_f/2)**2
+        momInertiaWeak = 2 * b**3 * t_f + t_mid**3 * (H - 2 * t_f)
 
         self.area = area
         self.momentOfInertiaStrong = momInertiaStrong
@@ -201,7 +202,6 @@ class Beam:
         :param load: list with load data, in global orientation
         :return:
         '''
-        self.distributedLoad = True
         if (np.sin(self.orientation) == 0):
             self.q1 = load[2]
             self.q2 = load[4]
@@ -248,7 +248,7 @@ class Beam:
         for i in range(2):
             string += f'u{i + 1}: {round(self.localDisplacements[i * 3], 4)} \tN{i + 1}: {round(self.reactionForces[i * 3], 2)}\n'
             string += f'w{i + 1}: {round(self.localDisplacements[i * 3 + 1], 4)} \tV{i + 1}: {round(self.reactionForces[i * 3 + 1], 2)}\n'
-            string += f'ø{i + 1}: {round(self.localDisplacements[i * 3 + 2], 4)} \tM{i + 1}: {round(self.reactionForces[i * 3 + 2], 2)}\n'
+            string += f'ø{i + 1}: {round(self.localDisplacements[i * 3 + 2]*180/np.pi, 4)} \tM{i + 1}: {round(self.reactionForces[i * 3 + 2], 2)}\n'
         print(string)
 
     def scaleDistributedLoad(self, referenceDiameter):
@@ -274,10 +274,10 @@ class Beam:
             q_R = (self.q1 - self.q1 * self.L_R / self.length) + self.q2 * self.L_R / self.length
             if abs(self.q1) < abs(q_R):
                 self.M_Max = -self.reactionForces[2] - self.reactionForces[1] * self.L_R - (
-                        self.q1 * self.L_R ** 2) / 2 - (q_R - self.q1) * (self.L_R ** 2) / 6
+                            self.q1 * self.L_R ** 2) / 2 - (q_R - self.q1) * (self.L_R ** 2) / 6
             else:
                 self.M_Max = -self.reactionForces[2] - self.reactionForces[1] * self.L_R - (q_R * self.L_R ** 2) / 2 - (
-                        self.q1 - q_R) * (self.L_R ** 2) / 3
+                            self.q1 - q_R) * (self.L_R ** 2) / 3
 
         except AttributeError:
             pass

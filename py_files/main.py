@@ -14,6 +14,7 @@ from structure_visualization import *
 
 def main():
     # Reads from inputfile and sorts the data in appropriate numpy arrays.
+    # Make sure the file path is correct for your enviroment's working-directory.
     nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, referenceDiameter = readInputFile(
         "InputDataJacket.txt")
 
@@ -68,16 +69,17 @@ def main():
     # Prints specifications for each beam to terminal for debugging.
     printBeamSpecsToTerminal(beamsObjectList)
 
-
-
-
     # Makes and plots moment diagrams.
     localMaxMomentForDistributedLoadBeams = plotMomentDiagram(beamsObjectList)
     print(localMaxMomentForDistributedLoadBeams)
 
     # The handed out code structure_visualization.py is altered to match our code and used to plot our jacket
     # construction. Displacements er scaled by 20.
-    plot(nodeArray, beamArray, resultingLoadVector * 20)
+    plot(nodeArray, beamArray, globalDisplacementVector * 20)
+
+    # Export data to txt-files
+    outputDataToFile(beamsObjectList)
+
     return 0
 
 

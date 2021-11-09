@@ -5,35 +5,6 @@ Developed at the Norwegian University of Science and Technology, Department of M
 
 from importedLibraries import *
 
-
-def readCSV_float(filename):
-    '''
-    Reads from file and makes an float array of list elements.
-    :param filename: .txt file
-    :return: np.array() of flots
-    '''
-    f = open(filename, 'r')
-    NODE = f.readlines()
-    for i, linje in enumerate(NODE):
-        NODE[i] = linje.split(',')
-    f.close()
-    return np.array(NODE, float)
-
-
-def readCSV_int(filename):
-    '''
-    Reads from file and makes an int array of list elements.
-    :param filename: .txt file
-    :return: np.array() of int's
-    '''
-    f = open(filename, 'r')
-    NODE = f.readlines()
-    for i, linje in enumerate(NODE):
-        NODE[i] = linje.split(',')
-    f.close()
-    return np.array(NODE, int)
-
-
 def readInputFile(filepath):
     '''
     Reads input file and sorts info into appropriate array
@@ -44,21 +15,37 @@ def readInputFile(filepath):
     lineList = f.readlines()
     NODE, BEAM, MATERIAL, NODELOAD, BEAMLOAD, PIPE, IPE = [], [], [], [], [], [], []
     # Set default reference diameter
-    REFERENCEDIAMETER = 1
+    REFERENCEDIAMETER = -1
     for i, line in enumerate(lineList):
         line = line.split(',')
         if line[0] == "NODE":
             NODE.append(line[1:])
+            # x, z, u, w, theta
+            # På u,w,theta er 
+            # 0 = "Denne er ikke fastholdt"
+            # 1 = "Denne er ukjent, må tas med i matrisen"
+            # 2 = "Denne er fastholdt"
         elif line[0] == "BEAM":
             BEAM.append(line[1:])
+            # N1, N2, M, G, n
+            # N1-Node lengst til venstre
+            # N2-Node lengst til høyre
+            # M-Materiale, 1=stål, 2=aluminium
+            # Geometri. 2 = pipe, 1 = IPE
+            # n utvalgt fra biblioteket
         elif line[0] == "MATERIAL":
             MATERIAL.append(line[1:])
+            # E-modul, flytspenning
+            # 1 er stål og 2 er aluminium
         elif line[0] == "NODELOAD":
             NODELOAD.append(line[1:])
+            # Nodenr, Fx, Fz, My
         elif line[0] == "BEAMLOAD":
             BEAMLOAD.append(line[1:])
+            # Beamnr, Fx1, Fz1, Fx2, Fz2
         elif line[0] == "PIPE":
             PIPE.append(line[1:])
+            # outer radius, inner radius
         elif line[0] == "IPE":
             IPE.append(line[1:])
         elif line[0] == "REFERENCEDIAMETER":

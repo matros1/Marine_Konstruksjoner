@@ -34,7 +34,7 @@ def initializeNodesAndBeamsList(nodeArray, beamArray):
 def makeBeamsGeometry(beamArray, beamsObjectList, pipeLibrary, IPELibrary):
     '''
     Decides from the input file which geometry to add to each beam object
-    param beamList: matrix containing beam-data from input file
+    param beamArray: matrix containing beam-data from input file
     param beamsObjectList: list containing all beam-objects
     param pipeLibrary: matrix containing pipe-data from input file
     param IPELibrary: matrix containing IPE-data from input file
@@ -135,8 +135,11 @@ def scaleDistributedBeamLoads(beamsObjectList, referenceDiameter):
     :param referenceDiameter: A reference diameter
     :return: A list of beam objects
     '''
-    for beam in beamsObjectList:
-        beam.scaleDistributedLoad(referenceDiameter)
+    if referenceDiameter == -1:
+        pass
+    else:
+        for beam in beamsObjectList:
+            beam.scaleDistributedLoad(referenceDiameter)
     return beamsObjectList
 
 
@@ -310,6 +313,35 @@ def calculateMaxMomentAndBendingTension(beamsObjectList):
         beam.calculateMaxBendingTension()
     return beamsObjectList
 
+def outputMomentsToFile(filename, beamsObjectList):
+    f = open(filename+'.txt', 'w')
+    for beam in beamsObjectList:
+        f.write(f'Beam: {beam.number},\t M1: {round(beam.reactionForces[2])}[Nm], \t M2: {round(beam.reactionForces[5])}[Nm]\n')
+    f.close
+
+def outputSheerToFile(filename, beamsObjectList):
+    f = open(filename+'.txt', 'w')
+    for beam in beamsObjectList:
+        f.write(f'Beam: {beam.number},\t V1: {round(beam.reactionForces[1])}[N], \t V2: {round(beam.reactionForces[4])}[N]\n')
+    f.close
+
+def outputStressToFile(filename, beamsObjectList):
+    f = open(filename+'.txt', 'w')
+    for beam in beamsObjectList:
+        f.write(f'Beam: {beam.number},\t sigma_x: {round(beam.sigmax/10**6,2)}[MPa]\n')
+    f.close
+
+def outputNormalForceToFile(filename, beamsObjectList):
+    f = open(filename+'.txt', 'w')
+    for beam in beamsObjectList:
+        f.write(f'Beam: {beam.number},\t N: {round(beam.reactionForces[0])}[N]\n')
+    f.close
+
+def outputDataToFile(beamsObjectList):
+    outputMomentsToFile('moments', beamsObjectList)
+    outputSheerToFile('sheer', beamsObjectList)
+    outputStressToFile('stress',beamsObjectList)
+    outputNormalForceToFile('normalForce', beamsObjectList)
 
 def getMomentDiagram(L, M1, V1, q1, q2, N):
     '''
