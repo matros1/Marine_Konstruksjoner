@@ -15,6 +15,7 @@ from structure_visualization import *
 
 def main():
     # Reads from inputfile and sorts the data in appropriate numpy arrays.
+    # Make shure the filepath is correct for your enviroment's working-directory.
     nodeArray, beamArray, materialArray, nodeloadArray, beamloadArray, pipeLibrary, IPELibrary, referenceDiameter = readInputFile(
         "InputDataJacket.txt")
 
@@ -71,9 +72,6 @@ def main():
 
     # Makes and plots moment diagrams.
     printMomentDiagram(beamsObjectList)
-
-    # Plots. Here we use the imported library structure visualization to visualize our frame.
-    # The plot only shows rotations, which is scaled by a factor of 20
 
     # The handed out code structure_visualization.py is altered to match our code and used to plot our jacket
     # construction. Displacements er scaled by 20.

@@ -133,9 +133,12 @@ def scaleDistributedBeamLoads(beamsObjectList, referenceDiameter):
     :param referenceDiameter: A reference diameter
     :return: A list of beam objects
     '''
-    for beam in beamsObjectList:
-        beam.scaleDistributedLoad(referenceDiameter)
-    return beamsObjectList
+    if referenceDiameter == -1:
+        pass
+    else:
+        for beam in beamsObjectList:
+            beam.scaleDistributedLoad(referenceDiameter)
+        return beamsObjectList
 
 
 def calculateFixedSupportMomentAndForces(beamsObjectList):
@@ -246,7 +249,7 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
                 for l in range(len(nodesObjectList)):
                     M[n * 3 + k][l] = 0
                     M[l][n * 3 + k] = 0
-                M[n + k][n + k] = 1
+                M[n * 3 + k][n * 3 + k] = 1
 
     return M
 

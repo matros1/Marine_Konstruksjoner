@@ -18,7 +18,7 @@ def readInputFile(filepath):
     lineList = f.readlines()
     NODE, BEAM, MATERIAL, NODELOAD, BEAMLOAD, PIPE, IPE = [], [], [], [], [], [], []
     # Set default reference diameter
-    REFERENCEDIAMETER = 1
+    REFERENCEDIAMETER = -1
     for i, line in enumerate(lineList):
         line = line.split(',')
         if line[0] == "NODE":
