@@ -138,7 +138,7 @@ def scaleDistributedBeamLoads(beamsObjectList, referenceDiameter):
     else:
         for beam in beamsObjectList:
             beam.scaleDistributedLoad(referenceDiameter)
-        return beamsObjectList
+    return beamsObjectList
 
 
 def calculateFixedSupportMomentAndForces(beamsObjectList):

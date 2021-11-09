@@ -247,7 +247,7 @@ class Beam:
         for i in range(2):
             string += f'u{i + 1}: {round(self.localDisplacements[i * 3], 4)} \tN{i + 1}: {round(self.reactionForces[i * 3], 2)}\n'
             string += f'w{i + 1}: {round(self.localDisplacements[i * 3 + 1], 4)} \tV{i + 1}: {round(self.reactionForces[i * 3 + 1], 2)}\n'
-            string += f'ø{i + 1}: {round(self.localDisplacements[i * 3 + 2], 4)} \tM{i + 1}: {round(self.reactionForces[i * 3 + 2], 2)}\n'
+            string += f'ø{i + 1}: {round(self.localDisplacements[i * 3 + 2]*180/np.pi, 4)} \tM{i + 1}: {round(self.reactionForces[i * 3 + 2], 2)}\n'
         print(string)
 
     def scaleDistributedLoad(self, referenceDiameter):

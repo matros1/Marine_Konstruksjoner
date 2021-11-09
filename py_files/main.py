@@ -71,7 +71,7 @@ def main():
     printBeamSpecsToTerminal(beamsObjectList)
 
     # Makes and plots moment diagrams.
-    printMomentDiagram(beamsObjectList)
+    #printMomentDiagram(beamsObjectList)
 
     # The handed out code structure_visualization.py is altered to match our code and used to plot our jacket
     # construction. Displacements er scaled by 20.
