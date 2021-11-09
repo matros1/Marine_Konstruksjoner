@@ -1,9 +1,7 @@
 '''
-Developed by Matias Rosenlund, Christian Lindahl Elseth og Hugo Furnes
-Norwegian University of Science and Technology, Department of Marine Technology
+Developed at the Norwegian University of Science and Technology, Department of Marine Technology
 08.11.2021 as part of TMR4167 Marin teknikk - Konstruksjoner
 '''
-
 
 from classes import *
 from importedLibraries import *
@@ -50,7 +48,7 @@ def makeBeamsGeometry(beamArray, beamsObjectList, pipeLibrary, IPELibrary):
             geo = int(beamArray[i][4] - 1)
             # IPE library includes hight, w top, w bot, w mid, t top, t bot
             beam.makeIPE(IPELibrary[geo][0], IPELibrary[geo][1], IPELibrary[geo][2],
-                         IPELibrary[geo][3], IPELibrary[geo][4], IPELibrary[geo][5])
+                         IPELibrary[geo][3])
 
         elif IPEorPipe == 2:
             # Else if beam geometry is pipe
@@ -250,7 +248,7 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
                 for l in range(len(nodesObjectList)):
                     M[n * 3 + k][l] = 0
                     M[l][n * 3 + k] = 0
-                M[n + k][n + k] = 1
+                M[3 * n + k][3 * n + k] = 1
 
     return M
 
@@ -303,89 +301,97 @@ def printBeamSpecsToTerminal(beamsObjectList, s=0, n=999999999):
 
 def calculateMaxMomentAndBendingTension(beamsObjectList):
     '''
-    Calculates max moment and bending tension.
+    Calculates max moment and bending tension by using beam class member functions.
     :param beamsObjectList: A list of beam objects
-    :return: Nothing
+    :return: A list of beam objects
     '''
-    for i in range(len(beamsObjectList)):
-        beamsObjectList[i].calculateMaxMoment()
-        beamsObjectList[i].calculateMaxBendingTension()
+    for beam in beamsObjectList:
+        beam.calculateMaxMoment()
+        beam.calculateMaxBendingTension()
     return beamsObjectList
 
 
-
-#Saved for later
-
-
 def getMomentDiagram(L, M1, V1, q1, q2, N):
+    '''
+    Calculates the moment diagram for an element.
+    :param L: length of the element
+    :param M1: Moment at start point for the element
+    :param V1: Shear force at start of the element
+    :param q1: triangle load value at start of element
+    :param q2: triangle load value at end of element
+    :param N: Number of equidistributed moment values calculated along the beam
+    :return: The moment diagram and corresponding x array
+    '''
     X = np.linspace(0, L, N + 1)
     dx = L / N
     momentList = []
 
-    # for i in range(N + 1):
-    #     m1 = q1 * (i * dx) / (6 * L) * (2 * L * L - 3 * L * (i * dx) + (i * dx) ** 2)
-    #     m2 = q2 * (L - i * dx) / (6 * L) * (2 * L * L - 3 * L * (L - i * dx) + (L - i * dx) ** 2)
-    #     momentList.append(-M1 + m1 + m2)
-
-    # for j in range(N + 1):
-    #     x = j * dx
-    #     qs = q1 * (1 - x / L) + q1 * x / L
-    #
-    #     if (q2 > q1):
-    #         ms = - M1 - V1*x + (-q1 * x ** 2) / 2 + (-q2 + q1) * (x ** 2) * 2/ (3 * L)
-    #     else:
-    #         ms = - M1 - V1*x + (-q2 * x ** 2) / 2 + (-q1+q2)*(1-x/L)*(x ** 2)/3 - (q1-q2)*x**2/6
-    #     momentList.append(ms)
-
-    for j in range(N+1):
-        x = j * dx
-        qs = q1 * (1 - x / L) + q1 * x / L
-
-        if (q2 > q1):
-            ms = - M1 - V1 * x + (-q1 * x ** 2) / 2 + (-qs + q1) * (x ** 2) / (6)
-        else:
-            ms = - M1 - V1 * x + (-qs * x ** 2) / 2 + (-q1 + qs) * (x ** 2) / 3
-        momentList.append(ms)
+    for k in range(N + 1):
+        x = k * dx
+        ms2 = -q2 * (x ** 3 / (6 * L))
+        ms1 = -q1 * (x ** 2 / 2 - x ** 3 / (6 * L))
+        ms0 = -M1 + - x * V1
+        momentList.append(ms0 + ms1 + ms2)
 
     return np.array(X), np.array(momentList)
 
 
-def printMomentDiagram(beamsObjectList):
+def plotMomentDiagram(beamsObjectList, N=100):
     '''
-    Prints a moment diagram to screen for each beam exposed to a distributed load.
+    Uses getMomentDiagram() and plotterForMomentDiagram() to calculate and plot the moment diagram
+    for each beam exposed to a distributed load.
     :param beamsObjectList: A list of beam objects
     :return: nothing
     '''
-    N = 100
-    Micro = 10 ** -6
 
     plotList = []
-    tempBeamList = []
-    for beam in beamsObjectList:
-        try:
+    beamWithDistributedLoads = []
 
-            plotList.append(getMomentDiagram(beam.length, beam.reactionForces[2], beam.reactionForces[1], beam.q1, beam.q2, N))
-            tempBeamList.append(beam)
-            print(beam.q1, beam.q2, beam.reactionForces[2], beam.reactionForces[5], beam.reactionForces[1])
-        except AttributeError:
+    for beam in beamsObjectList:
+        # If the beam has a distributed load attached
+        if (beam.distributedLoad):
+            plotList.append(
+                getMomentDiagram(beam.length, beam.reactionForces[2], beam.reactionForces[1], beam.q1, beam.q2, N))
+            beamWithDistributedLoads.append(beam)
+        else:
             pass
 
+    localMaxMomentForDistributedLoadBeams = plotterForMomentDiagram(plotList, beamWithDistributedLoads, N)
+
+    return localMaxMomentForDistributedLoadBeams
+
+
+def plotterForMomentDiagram(plotList, beamWithDistributedLoads, N):
+    '''
+    Plots a moment diagram and corresponding extreme values.
+    :param plotList: A matrix of moment diagram
+    :param tempBeamList: A list of beams with distributed loads
+    :param N: Number of equidistributed moment values along the beams
+    :return: nothing
+    '''
+    Micro = 10 ** -6
+    localMaxMomentForDistributedLoadBeams = []
     for i in range(len(plotList)):
         plt.figure(i)
         plt.plot(plotList[i][0], plotList[i][1] * Micro, c='r', label='M(x)')
         plt.xlabel('x [ m ]')
         plt.ylabel('Moment [ MNm ]')
-        plt.title('Bending moment diagram for element ' + str(tempBeamList[i].number))
+        plt.title('Bending moment diagram for element ' + str(beamWithDistributedLoads[i].number))
         plt.grid()
-
         plt.plot()
+
+        # Finds the local moment maximum value
         if (plotList[i][1][0] < 0):
             maxValue = np.max(plotList[i][1])
             iMax = np.argmax(plotList[i][1])
         else:
             maxValue = np.min(plotList[i][1])
             iMax = np.argmin(plotList[i][1])
-        xMax = iMax * tempBeamList[i].length / N
+
+        localMaxMomentForDistributedLoadBeams.append([int(beamWithDistributedLoads[i].number), int(maxValue)])
+
+        # Plots
+        xMax = iMax * beamWithDistributedLoads[i].length / N
         maxValueMNm = maxValue * Micro
         startValueMNm = plotList[i][1][0] * Micro
         endValueMNm = plotList[i][1][-1] * Micro
@@ -399,4 +405,7 @@ def printMomentDiagram(beamsObjectList):
                      round(plotList[i][0][-1], 2)) + ' m')
         plt.legend()
 
+
+
     plt.show()
+    return np.array(localMaxMomentForDistributedLoadBeams)

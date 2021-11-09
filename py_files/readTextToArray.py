@@ -1,10 +1,7 @@
 '''
-Developed by Matias Rosenlund, Christian Lindahl Elseth og Hugo Furnes
-Norwegian University of Science and Technology, Department of Marine Technology
+Developed at the Norwegian University of Science and Technology, Department of Marine Technology
 08.11.2021 as part of TMR4167 Marin teknikk - Konstruksjoner
 '''
-
-
 
 from importedLibraries import *
 

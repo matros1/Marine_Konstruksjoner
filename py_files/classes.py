@@ -1,6 +1,5 @@
 '''
-Developed by Matias Rosenlund, Christian Lindahl Elseth og Hugo Furnes
-Norwegian University of Science and Technology, Department of Marine Technology
+Developed at the Norwegian University of Science and Technology, Department of Marine Technology
 08.11.2021 as part of TMR4167 Marin teknikk - Konstruksjoner
 '''
 
@@ -30,6 +29,7 @@ class Beam:
         self.z2 = NODE2.z
         self.orientation = self.getGlobalOrientation()
         self.length = self.getLength()
+        self.distributedLoad = False
 
     def getGlobalOrientation(self):
         '''
@@ -78,8 +78,7 @@ class Beam:
         self.diameter = 2 * r
         self.Zc = r
 
-
-    def makeIPE(self, H, w_top, w_bot, w_mid, t_top, t_bot):
+    def makeIPE(self, H, b, t_mid, t_f):
         '''
         Turns the beam object into a IPE profle,
         and calculates corresponding area and moment of inertia.
@@ -91,26 +90,21 @@ class Beam:
         :param t_bot: thickness bottom
         :return: nothing
         '''
-        Atop = w_top * t_top
-        Abot = w_bot * t_bot
-        Amid = (H - t_top - t_bot) * w_mid
+        A_f = b * t_f
+        Amid = (H - 2 * t_f) * t_mid
 
-        self.Zc = (Atop * (H - t_top / 2) + Amid * ((H - t_top - t_bot) / 2 + t_bot) + Abot * t_bot / 2) / (
-                    Atop + Amid + Abot)
+        I_f = b * t_f ** 3 / 12
+        Imid = (H - 2 * t_f) ** 3 * t_mid / 12
 
-        Itop = w_top * t_top ** 3 / 12
-        Ibot = w_bot * t_bot ** 3 / 12
-        Imid = (H - t_top - t_bot) ** 3 * w_mid / 12
-
-        area = Atop + Abot + Amid
-        momInertiaStrong = Itop + Ibot + Imid + Atop * (H - t_top / 2 - self.Zc) ** 2 + Amid * (
-                    (H - t_top - t_bot) / 2 + t_bot - self.Zc) ** 2 + Abot * (t_bot / 2 - self.Zc) ** 2
-        momInertiaWeak = (w_top ** 3 * t_top + w_mid ** 3 * (H - t_top - t_bot) + w_bot ** 3 * t_bot) / 12
+        area = 2 * A_f + Amid
+        momInertiaStrong = 2 * I_f + Imid + 2 * A_f * (H / 2 - t_f / 2) ** 2
+        momInertiaWeak = 2 * b ** 3 * t_f + t_mid ** 3 * (H - 2 * t_f)
 
         self.area = area
         self.momentOfInertiaStrong = momInertiaStrong
         self.momentOfInertiaWeak = momInertiaWeak
-        self.diameter = max([w_top, w_bot])
+        self.diameter = b
+        self.Zc = H / 2
 
     def giveNumber(self, beamNumber):
         '''
@@ -207,6 +201,7 @@ class Beam:
         :param load: list with load data, in global orientation
         :return:
         '''
+        self.distributedLoad = True
         if (np.sin(self.orientation) == 0):
             self.q1 = load[2]
             self.q2 = load[4]
@@ -279,10 +274,10 @@ class Beam:
             q_R = (self.q1 - self.q1 * self.L_R / self.length) + self.q2 * self.L_R / self.length
             if abs(self.q1) < abs(q_R):
                 self.M_Max = -self.reactionForces[2] - self.reactionForces[1] * self.L_R - (
-                            self.q1 * self.L_R ** 2) / 2 - (q_R - self.q1) * (self.L_R ** 2) / 6
+                        self.q1 * self.L_R ** 2) / 2 - (q_R - self.q1) * (self.L_R ** 2) / 6
             else:
                 self.M_Max = -self.reactionForces[2] - self.reactionForces[1] * self.L_R - (q_R * self.L_R ** 2) / 2 - (
-                            self.q1 - q_R) * (self.L_R ** 2) / 3
+                        self.q1 - q_R) * (self.L_R ** 2) / 3
 
         except AttributeError:
             pass

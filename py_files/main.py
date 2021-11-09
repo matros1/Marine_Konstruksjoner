@@ -1,6 +1,5 @@
 '''
-Developed by Matias Rosenlund, Christian Lindahl Elseth og Hugo Furnes
-Norwegian University of Science and Technology, Department of Marine Technology
+Developed at the Norwegian University of Science and Technology, Department of Marine Technology
 08.11.2021 as part of TMR4167 Marin teknikk - Konstruksjoner
 '''
 
@@ -69,16 +68,16 @@ def main():
     # Prints specifications for each beam to terminal for debugging.
     printBeamSpecsToTerminal(beamsObjectList)
 
-    # Makes and plots moment diagrams.
-    printMomentDiagram(beamsObjectList)
 
-    # Plots. Here we use the imported library structure visualization to visualize our frame.
-    # The plot only shows rotations, which is scaled by a factor of 20
+
+
+    # Makes and plots moment diagrams.
+    localMaxMomentForDistributedLoadBeams = plotMomentDiagram(beamsObjectList)
+    print(localMaxMomentForDistributedLoadBeams)
 
     # The handed out code structure_visualization.py is altered to match our code and used to plot our jacket
     # construction. Displacements er scaled by 20.
-    plot(nodeArray, beamArray, r * 20)
-
+    plot(nodeArray, beamArray, resultingLoadVector * 20)
     return 0
 
 

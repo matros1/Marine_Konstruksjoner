@@ -92,7 +92,7 @@ def plot_structure_def(ax, punkt, elem, numbers, index_start, r):
     for iel in range(0, el_nod.shape[0]):
         delta_x = nodes[el_nod[iel, 1] - elNodToNodesKonstant, 0] - nodes[el_nod[iel, 0] - elNodToNodesKonstant, 0]
         delta_z = nodes[el_nod[iel, 1] - elNodToNodesKonstant, 1] - nodes[el_nod[iel, 0] - elNodToNodesKonstant, 1]
-        L = np.sqrt(delta_x ** 2 + delta_z ** 2)
+        L = np.sqrt(delta_x ** 2 +  delta_z ** 2)
         if delta_z >= 0:
             psi = np.arccos(delta_x / L)
         else:
