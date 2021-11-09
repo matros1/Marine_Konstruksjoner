@@ -301,43 +301,6 @@ def calculateMaxMomentAndBendingTension(beamsObjectList):
     return beamsObjectList
 
 
-def outputMomentsToFile(filename, beamsObjectList):
-    f = open(filename + '.txt', 'w')
-    for beam in beamsObjectList:
-        f.write(
-            f'Beam: {beam.number},\t M1: {round(beam.reactionForces[2])}[Nm], \t M2: {round(beam.reactionForces[5])}[Nm]\n')
-    f.close
-
-
-def outputSheerToFile(filename, beamsObjectList):
-    f = open(filename + '.txt', 'w')
-    for beam in beamsObjectList:
-        f.write(
-            f'Beam: {beam.number},\t V1: {round(beam.reactionForces[1])}[N], \t V2: {round(beam.reactionForces[4])}[N]\n')
-    f.close
-
-
-def outputStressToFile(filename, beamsObjectList):
-    f = open(filename + '.txt', 'w')
-    for beam in beamsObjectList:
-        f.write(f'Beam: {beam.number},\t sigma_x: {round(beam.sigmax / 10 ** 6, 2)}[MPa]\n')
-    f.close
-
-
-def outputNormalForceToFile(filename, beamsObjectList):
-    f = open(filename + '.txt', 'w')
-    for beam in beamsObjectList:
-        f.write(f'Beam: {beam.number},\t N: {round(beam.reactionForces[0])}[N]\n')
-    f.close
-
-
-def outputDataToFile(beamsObjectList):
-    outputMomentsToFile('moments', beamsObjectList)
-    outputSheerToFile('sheer', beamsObjectList)
-    outputStressToFile('stress', beamsObjectList)
-    outputNormalForceToFile('normalForce', beamsObjectList)
-
-
 def plotMomentDiagram(beamsObjectList):
     Micro = 10 ** -6
     i = 0
@@ -369,3 +332,22 @@ def plotMomentDiagram(beamsObjectList):
             i += 1
 
     plt.show()
+
+
+def outputResultsToFile(filename, beamsObjectList, nodesObjectList, r):
+    f = open(filename + '.txt', 'w')
+    f.write('Node displacements\nNode\tu [mm]\tw [mm]\ttheta [rad]\n')
+    for i in range(len(nodesObjectList)):
+        f.write(f' {i+1}\t\t{round(r[i*3]*10**3)}\t\t{round(r[i*3+1]*10**3)}\t\t{round(r[i*3+2],4)}\n')
+    f.write('\nMoments\nBeam\tM1 [MNm]\tM2 [MNm]\tM_field_max\n')
+    for beam in beamsObjectList:
+        if(beam.hasDistributedLoad):
+            f.write(f' {beam.number}\t\t{round(beam.reactionForces[2]/10**6,2)} \t\t{round(beam.reactionForces[5]/10**6,2)}\t\t{round(beam.localMaxMoment/10**6,2)}\n')
+        else:
+            f.write(f' {beam.number}\t\t{round(beam.reactionForces[2]/10**6,2)} \t\t{round(beam.reactionForces[5]/10**6,2)}\n')
+    f.write('\nSheer\nBeam\tQ1 [MN]\tQ2 [MN]\n')
+    for beam in beamsObjectList:
+        f.write(f' {beam.number}\t\t{round(beam.reactionForces[1]/10**6,2)} \t\t{round(beam.reactionForces[4]/10**6,2)}\n')
+    f.write('\nAxial Force\nBeam\tN [MN]\n')
+    for beam in beamsObjectList:
+        f.write(f' {beam.number}\t\t{round(beam.reactionForces[3]/10**6,2)}\n')

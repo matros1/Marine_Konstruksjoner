@@ -287,21 +287,18 @@ class Beam:
         self.localMaxMomentX = self.localMaxMomentIndex * self.length / N
 
 
-
-
-
-
     def calculateMaxTension(self):
         '''
         Calculates maximun bending tension and security factor.
         :return: nothing
         '''
         try:
-            self.sigmax = max([abs(self.reactionForces[2]), abs(self.M_R),
+            self.sigmax = max([abs(self.reactionForces[2]), abs(self.localMaxMoment),
                                abs(self.reactionForces[5])]) * self.Zc / self.momentOfInertiaStrong
         except AttributeError:
             self.sigmax = max(
                 [abs(self.reactionForces[2]), abs(self.reactionForces[5])]) * self.Zc / self.momentOfInertiaStrong
+        self.sigmax += abs(self.reactionForces[0])/self.area
         self.securityFactor = self.sigmax / self.sigmafy
 
 

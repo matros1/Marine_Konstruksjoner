@@ -72,18 +72,15 @@ def main():
     # Prints specifications for each beam to terminal for debugging.
     printBeamSpecsToTerminal(beamsObjectList)
 
-
-
-    # Plots moment diagrams for beams with distributed load.
-    plotMomentDiagram(beamsObjectList)
-
-
     # The handed out code structure_visualization.py is altered to match our code and used to plot our jacket
     # construction. Displacements er scaled by 20.
     plot(nodeArray, beamArray, globalDisplacementVector * 20)
 
-    # Export data to txt-files
-    outputDataToFile(beamsObjectList)
+    # Plots moment diagrams for beams with distributed load.
+    plotMomentDiagram(beamsObjectList)
+
+    # Export data to txt-file
+    outputResultsToFile('Results', beamsObjectList, nodesObjectList, globalDisplacementVector)
 
     return 0
 
