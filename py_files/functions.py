@@ -351,3 +351,7 @@ def outputResultsToFile(filename, beamsObjectList, nodesObjectList, r):
     f.write('\nAxial Force\nBeam\tN [MN]\n')
     for beam in beamsObjectList:
         f.write(f' {beam.number}\t\t{round(beam.reactionForces[3]/10**6,2)}\n')
+    f.write('\nStress\nBeam\tSigma_x [MPa]\t%fy\n')
+    for beam in beamsObjectList:
+        f.write(f' {beam.number}\t\t\t{round(beam.sigmax / 10 ** 6)}\t\t\t{round(beam.securityFactor * 100)}%\n')
+    
