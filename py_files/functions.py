@@ -63,7 +63,7 @@ def makeBeamsGeometry(beamArray, beamsObjectList, pipeLibrary, IPELibrary):
 
 def giveYoungsModulusToBeams(beamsObjectList, materialArray, beamArray):
     '''
-    This function appends Young's modulus to elements
+    This function appends Youngs modulus to elements
     :param beamsObjectList: List of beam objects
     :param materialArray: Library of materials
     :param beamArray: Array of beam data from input file
@@ -145,7 +145,7 @@ def scaleDistributedBeamLoads(beamsObjectList, referenceDiameter):
 
 def calculateFixedSupportMomentAndForces(beamsObjectList):
     '''
-    Calculates the each beam's fixed support moment and forces at both ends.
+    Calculates the each beams fixed support moment and forces at both ends.
     :param beamsObjectList: A list of beam objects
     :return: A list of beam objects
     '''
@@ -353,5 +353,5 @@ def outputResultsToFile(filename, beamsObjectList, nodesObjectList, r):
         f.write(f' {beam.number}\t\t{round(beam.reactionForces[3]/10**6,2)}\n')
     f.write('\nStress\nBeam\tSigma_x [MPa]\t%fy\n')
     for beam in beamsObjectList:
-        f.write(f' {beam.number}\t\t\t{round(beam.sigmax / 10 ** 6)}\t\t\t{round(beam.securityFactor * 100)}%\n')
+        f.write(f' {beam.number}\t\t\t{round(beam.sigmax / 10 ** 6,1)}\t\t\t{int(round(beam.securityFactor * 100))}%\n')
     
