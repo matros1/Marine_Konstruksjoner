@@ -26,14 +26,16 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="63919abc-3143-4d9a-98cf-126dc30e8689" name="Default Changelist" comment="All files are cleaned and made easy to read.">
+    <list default="true" id="63919abc-3143-4d9a-98cf-126dc30e8689" name="Default Changelist" comment="All files are cleaned and moment diagram works.">
+      <change afterPath="$PROJECT_DIR$/py_files/moments.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/py_files/normalForce.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/py_files/sheer.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/py_files/stress.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/py_files/InputDataJacket.txt" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/InputDataJacket.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/InputDataJacket.txt" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/InputDataJacket.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/py_files/classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/classes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/py_files/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/py_files/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/py_files/readTextToArray.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/readTextToArray.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/py_files/structure_visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/py_files/structure_visualization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,15 +50,20 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RESET_MODE" value="HARD" />
   </component>
   <component name="ProjectId" id="205DhbRNzikeUp3Sr2k7zD8EZiD" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="ChangesTree.GroupingKeys" value="" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
@@ -159,7 +166,14 @@
       <option name="project" value="LOCAL" />
       <updated>1636399564708</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="All files are cleaned and moment diagram works.">
+      <created>1636460322519</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1636460322519</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.History.Properties">
@@ -248,6 +262,7 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="Removed unneccisary function." />
     <MESSAGE value="Wrote a comment." />
     <MESSAGE value="All Hugo updates from this week." />
@@ -255,9 +270,14 @@
     <MESSAGE value="Added scaling of beam forces with respect to beam dimentions. Scaling constant:&#10; k = D/1.5m" />
     <MESSAGE value="Remove makeListOfBeamsAndNodes() function. This is a main() function job." />
     <MESSAGE value="All files are cleaned and made easy to read." />
-    <option name="LAST_COMMIT_MESSAGE" value="All files are cleaned and made easy to read." />
+    <MESSAGE value="All files are cleaned and moment diagram works." />
+    <option name="LAST_COMMIT_MESSAGE" value="All files are cleaned and moment diagram works." />
   </component>
   <component name="WindowStateProjectService">
+    <state x="654" y="275" key="#Notifications" timestamp="1636460561687">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="654" y="275" key="#Notifications/0.0.1536.824@0.0.1536.824" timestamp="1636460561687" />
     <state x="534" y="214" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1635432580628">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -266,54 +286,66 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="484" y="8" key="#main/0.0.1536.824@0.0.1536.824" timestamp="1635326829753" />
+    <state x="93" y="93" width="1350" height="638" key="DiffContextDialog" timestamp="1636461194277">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="93" y="93" width="1350" height="638" key="DiffContextDialog/0.0.1536.824@0.0.1536.824" timestamp="1636461194277" />
     <state x="549" y="167" key="FileChooserDialogImpl" timestamp="1636295292124">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="549" y="167" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1636295292124" />
-    <state width="1515" height="287" key="GridCell.Tab.0.bottom" timestamp="1636458839711">
+    <state width="1515" height="188" key="GridCell.Tab.0.bottom" timestamp="1636464472165">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="268" key="GridCell.Tab.0.bottom/0.0.1536.824/-1920.-67.1920.1160@0.0.1536.824" timestamp="1636273673547" />
-    <state width="1515" height="287" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1636458839711" />
-    <state width="1515" height="287" key="GridCell.Tab.0.center" timestamp="1636458839710">
+    <state width="1515" height="188" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1636464472165" />
+    <state width="1515" height="188" key="GridCell.Tab.0.center" timestamp="1636464472165">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="268" key="GridCell.Tab.0.center/0.0.1536.824/-1920.-67.1920.1160@0.0.1536.824" timestamp="1636273673546" />
-    <state width="1515" height="287" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1636458839710" />
-    <state width="1515" height="287" key="GridCell.Tab.0.left" timestamp="1636458839710">
+    <state width="1515" height="188" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1636464472165" />
+    <state width="1515" height="188" key="GridCell.Tab.0.left" timestamp="1636464472165">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="268" key="GridCell.Tab.0.left/0.0.1536.824/-1920.-67.1920.1160@0.0.1536.824" timestamp="1636273673545" />
-    <state width="1515" height="287" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1636458839710" />
-    <state width="1515" height="287" key="GridCell.Tab.0.right" timestamp="1636458839710">
+    <state width="1515" height="188" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1636464472165" />
+    <state width="1515" height="188" key="GridCell.Tab.0.right" timestamp="1636464472165">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state width="1515" height="268" key="GridCell.Tab.0.right/0.0.1536.824/-1920.-67.1920.1160@0.0.1536.824" timestamp="1636273673547" />
-    <state width="1515" height="287" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1636458839710" />
-    <state x="147" y="65" key="MergeDialog" timestamp="1636367814016">
+    <state width="1515" height="188" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1636464472165" />
+    <state x="147" y="65" key="MergeDialog" timestamp="1636461137067">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="147" y="65" key="MergeDialog/0.0.1536.824@0.0.1536.824" timestamp="1636367814016" />
-    <state x="407" y="174" key="MultipleFileMergeDialog" timestamp="1636367814022">
+    <state x="147" y="65" key="MergeDialog/0.0.1536.824@0.0.1536.824" timestamp="1636461137067" />
+    <state x="407" y="174" key="MultipleFileMergeDialog" timestamp="1636461137074">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="407" y="174" key="MultipleFileMergeDialog/0.0.1536.824@0.0.1536.824" timestamp="1636367814022" />
+    <state x="407" y="174" key="MultipleFileMergeDialog/0.0.1536.824@0.0.1536.824" timestamp="1636461137074" />
     <state x="277" y="57" key="SettingsEditor" timestamp="1635327161202">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="277" y="57" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1635327161202" />
-    <state x="555" y="128" key="VCS.ChangeListViewerDialog" timestamp="1635935664663">
+    <state x="555" y="128" key="VCS.ChangeListViewerDialog" timestamp="1636460551964">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="555" y="128" key="VCS.ChangeListViewerDialog/0.0.1536.824@0.0.1536.824" timestamp="1635935664663" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1636458594719">
+    <state x="555" y="128" key="VCS.ChangeListViewerDialog/0.0.1536.824@0.0.1536.824" timestamp="1636460551964" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1636460440315">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1636458594719" />
-    <state x="578" y="326" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1636400281530">
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1636460440315" />
+    <state x="578" y="326" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1636460546604">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="578" y="326" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1536.824@0.0.1536.824" timestamp="1636400281530" />
+    <state x="578" y="326" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1536.824@0.0.1536.824" timestamp="1636460546604" />
+    <state x="431" y="125" key="git4idea.branch.GitSmartOperationDialog" timestamp="1636460603973">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="431" y="125" key="git4idea.branch.GitSmartOperationDialog/0.0.1536.824@0.0.1536.824" timestamp="1636460603973" />
+    <state x="466" y="201" key="git4idea.merge.GitPullDialog" timestamp="1636461563540">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="466" y="201" key="git4idea.merge.GitPullDialog/0.0.1536.824@0.0.1536.824" timestamp="1636461563540" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1636388413105">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

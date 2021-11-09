@@ -29,7 +29,7 @@ class Beam:
         self.z2 = NODE2.z
         self.orientation = self.getGlobalOrientation()
         self.length = self.getLength()
-        self.distributedLoad = False
+        self.hasDistributedLoad = False
 
     def getGlobalOrientation(self):
         '''
@@ -202,6 +202,7 @@ class Beam:
         :param load: list with load data, in global orientation
         :return:
         '''
+        self.hasDistributedLoad = True
         if (np.sin(self.orientation) == 0):
             self.q1 = load[2]
             self.q2 = load[4]
@@ -220,8 +221,7 @@ class Beam:
         :return: nothing
         '''
 
-        # If q1 or q2 is not defined an Attribute error will occur
-        try:
+        if (self.hasDistributedLoad):
             m1 = (1 / 20) * self.q1 * (self.length) ** 2 + (1 / 30) * self.q2 * (self.length) ** 2
             m2 = -(1 / 30) * self.q1 * (self.length) ** 2 - (1 / 20) * self.q2 * (self.length) ** 2
 
@@ -235,21 +235,9 @@ class Beam:
             self.node1.Fz += v1 * np.cos(self.orientation)
             self.node2.Fx += v2 * np.sin(self.orientation)
             self.node2.Fz += v2 * np.cos(self.orientation)
-        except AttributeError:
+        else:
             pass
 
-    def printBeam(self):
-        '''
-        Prints beam data in a more readable way
-        :return: nothing
-        '''
-
-        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation * 180 / np.pi, 2)}, L: {round(self.length, 2)}\n'
-        for i in range(2):
-            string += f'u{i + 1}: {round(self.localDisplacements[i * 3], 4)} \tN{i + 1}: {round(self.reactionForces[i * 3], 2)}\n'
-            string += f'w{i + 1}: {round(self.localDisplacements[i * 3 + 1], 4)} \tV{i + 1}: {round(self.reactionForces[i * 3 + 1], 2)}\n'
-            string += f'ø{i + 1}: {round(self.localDisplacements[i * 3 + 2]*180/np.pi, 4)} \tM{i + 1}: {round(self.reactionForces[i * 3 + 2], 2)}\n'
-        print(string)
 
     def scaleDistributedLoad(self, referenceDiameter):
         '''
@@ -257,43 +245,53 @@ class Beam:
         :param referenceDiameter: a float thar reperesent the reference diameter
         :return: nothing
         '''
-        try:
+        if(self.hasDistributedLoad):
             self.q1 *= self.diameter / referenceDiameter
             self.q2 *= self.diameter / referenceDiameter
-        except AttributeError:
+        else:
             pass
 
-    def calculateMaxMoment(self):
+    def appendMomentDiagramToBeam(self, N=100):
         '''
-            Denne er feil.
-        :return:
+        Calculates the moment diagram for an element.
+        :param L: length of the element
+        :param M1: Moment at start point for the element
+        :param V1: Shear force at start of the element
+        :param q1: triangle load value at start of element
+        :param q2: triangle load value at end of element
+        :param N: Number of equidistributed moment values calculated along the beam
+        :return: The moment diagram and corresponding x array
         '''
-        try:
-            # Max moment where sheer = 0, and where the resultant force of the distributed load attacks
-            self.L_R = ((self.q1 / 2 + self.q2) * 2 * self.length) / ((self.q1 + self.q2) * 3)
-            q_R = (self.q1 - self.q1 * self.L_R / self.length) + self.q2 * self.L_R / self.length
-            if abs(self.q1) < abs(q_R):
-                self.M_Max = -self.reactionForces[2] - self.reactionForces[1] * self.L_R - (
-                            self.q1 * self.L_R ** 2) / 2 - (q_R - self.q1) * (self.L_R ** 2) / 6
-            else:
-                self.M_Max = -self.reactionForces[2] - self.reactionForces[1] * self.L_R - (q_R * self.L_R ** 2) / 2 - (
-                            self.q1 - q_R) * (self.L_R ** 2) / 3
 
-        except AttributeError:
-            pass
+        X = np.linspace(0, self.length, N + 1)
+        dx = self.length / N
+        momentList = []
 
-    def printBeamMoments(self):
-        '''
-        Prints moment values to terminal.
-        :return: nothing
-        '''
-        try:
-            string = f'M1: {round(self.reactionForces[2])}, M_max: {round(self.M_Max)} at {round(self.L_R, 3)}, M2: {round(self.reactionForces[5])}'
-        except AttributeError:
-            string = f'M1: {round(self.reactionForces[2])}, No ditributed load, M2: {round(self.reactionForces[5])}'
-        print(string)
+        for k in range(N + 1):
+            x = k * dx
+            ms2 = -self.q2 * (x ** 3 / (6 * self.length))
+            ms1 = -self.q1 * (x ** 2 / 2 - x ** 3 / (6 * self.length))
+            ms0 = -self.reactionForces[2] + - x * self.reactionForces[1]
+            momentList.append(ms0 + ms1 + ms2)
 
-    def calculateMaxBendingTension(self):
+        self.equidistributedX = np.array(X)
+        self.momentDiagram = momentList
+
+        if (momentList[0] < 0):
+            self.localMaxMoment = np.max(momentList)
+            self.localMaxMomentIndex = np.argmax(momentList)
+        else:
+            self.localMaxMoment = np.min(momentList)
+            self.localMaxMomentIndex = np.argmin(momentList)
+
+        self.localMaxMomentX = self.localMaxMomentIndex * self.length / N
+
+
+
+
+
+
+    def calculateMaxTension(self):
         '''
         Calculates maximun bending tension and security factor.
         :return: nothing
@@ -306,6 +304,9 @@ class Beam:
                 [abs(self.reactionForces[2]), abs(self.reactionForces[5])]) * self.Zc / self.momentOfInertiaStrong
         self.securityFactor = self.sigmax / self.sigmafy
 
+
+
+
     def printSecurityFactor(self):
         '''
         Prints the security factor to terminal.
@@ -313,26 +314,29 @@ class Beam:
         '''
         print(f'Sigma_x: {round(self.sigmax / 10 ** 6)} [MPa], {round(self.securityFactor * 100)}% of fy\n\n')
 
-    def getMomentDiagram(self):
+    def printBeam(self):
         '''
-        Denne er feil.
-        :return:
+        Prints beam data in a more readable way
+        :return: nothing
+        '''
+
+        string = f'Beam {self.number} from node {self.node1.number} to {self.node2.number}, Ø: {round(self.orientation * 180 / np.pi, 2)}, L: {round(self.length, 2)}\n'
+        for i in range(2):
+            string += f'u{i + 1}: {round(self.localDisplacements[i * 3], 4)} \tN{i + 1}: {round(self.reactionForces[i * 3], 2)}\n'
+            string += f'w{i + 1}: {round(self.localDisplacements[i * 3 + 1], 4)} \tV{i + 1}: {round(self.reactionForces[i * 3 + 1], 2)}\n'
+            string += f'ø{i + 1}: {round(self.localDisplacements[i * 3 + 2] * 180 / np.pi, 4)} \tM{i + 1}: {round(self.reactionForces[i * 3 + 2], 2)}\n'
+        print(string)
+
+    def printBeamMoments(self):
+        '''
+        Prints moment values to terminal.
+        :return: nothing
         '''
         try:
-            L = self.length
-            N = 20
-            x = np.linspace(0, L, N + 1)
-            dx = L / N
-            momentList = [0] * (N + 1)
-
-            for i in range(N + 1):
-                M1 = self.q1 * (i * dx) / (6 * L) * (2 * L * L - 3 * L * (i * dx) + (i * dx) ** 2)
-                M2 = self.q2 * (L - i * dx) / (6 * L) * (2 * L * L - 3 * L * (L - i * dx) + (L - i * dx) ** 2)
-                momentList[i] += self.reactionForce[2] + M1 + M2
-
-            return momentList, np.array(x)
+            string = f'M1: {round(self.reactionForces[2])}, M_max: {round(self.localMaxMoment)} at {round(self.localMaxMomentX, 3)}, M2: {round(self.reactionForces[5])}'
         except AttributeError:
-            pass
+            string = f'M1: {round(self.reactionForces[2])}, No ditributed load, M2: {round(self.reactionForces[5])}'
+        print(string)
 
 
 class Node:

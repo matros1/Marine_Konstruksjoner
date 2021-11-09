@@ -157,42 +157,16 @@ def calculateFixedSupportMomentAndForces(beamsObjectList):
 def connectNodeLoadsToNodes(nodesObjectList, nodeloadArray):
     '''
     Conncts the nodeloads to the node objects
-    param nodesObjectList: list of all Node objects
-    param nodeloadArray: np array of all node loads
+    :param nodesObjectList: a list of node objects
+    :param nodeloadArray: an array node data from input file
+    :return: a list of node objects
     '''
+
     for i in range(len(nodeloadArray)):
         for j in range(len(nodesObjectList)):
             if (nodesObjectList[j].number == nodeloadArray[i][0]):
                 nodesObjectList[j].addNodeLoad(nodeloadArray[i])
     return nodesObjectList
-
-
-def getMomentFromTriangleLoad(q1, q2, L):
-    '''
-    Returns a array of the moment distribution along a beam from a triangle pluss rectangle load.
-    This can also ofcorse return moment at L/2 as required from the project description.
-    :param q1: Initial load
-    :param q2: Final load (larger than or equal to q1)
-    :param L: length of beam
-    :return: a moment distribution list.
-    '''
-
-    N = 100
-    x = np.linspace(0, L, N + 1)
-    dx = L / N
-    momentList = [0] * (N + 1)
-    q_const = np.abs(min(q1, q2))
-
-    for i in range(N + 1):
-        # Constant load
-        momentList[i] += q_const * (i * dx) * (L - i * dx) / 2
-        # Triangle load
-        if q1 >= q2:
-            momentList[i] += (q1 - q2) * (i * dx) / (6 * L) * (2 * L * L - 3 * L * (i * dx) + (i * dx) ** 2)
-        else:
-            momentList[i] += (q2 - q1) * (L - i * dx) / (6 * L) * (2 * L * L - 3 * L * (L - i * dx) + (L - i * dx) ** 2)
-
-    return np.array(momentList), x
 
 
 def makeResultingLoadVector(nodesObjectList):
@@ -215,10 +189,12 @@ def makeGlobalStiffnessMatrix(beamsObjectList, nodesObjectList):
     Makes the global stiffness matrix by adding each beams transformed stiffness matrix in position
     given by the nodes each beam is connected to.
     We then account for fixed support conditions.
-    param beamsObjectList: List of beam objects
-    param nodesObjectList: List of node objects
-    return: Global stiffness matrix, 3n x 3n
+    :param beamsObjectList: A list of beam objects
+    :param nodesObjectList: A list of node objects
+    :return: A 3n x 3n array
     '''
+
+
     M = np.zeros((3 * len(nodesObjectList), 3 * len(nodesObjectList)))
 
     # Make stiffness matrix
@@ -285,12 +261,24 @@ def calculateBeamReactionForces(beamsObjectList, r):
     return beamsObjectList
 
 
-def printBeamSpecsToTerminal(beamsObjectList, s=0, n=999999999):
+def appendMomentDiagramToBeams(beamsObjectList):
     '''
-    Prints the reaction forces for each beam. This is mostly used for debugging.
-    :param beamsObjectList:
-    :param s: A list of beam objects
-    :param n: if n is given, the function will print forces of the n first beams, else, print for all beams
+    Appends moment diagram and related values as member variabels to beam.
+    :param beamsObjectList: A list of beam objects
+    :return: A list of beam objects
+    '''
+    for beam in beamsObjectList:
+        if beam.hasDistributedLoad:
+            beam.appendMomentDiagramToBeam()
+    return beamsObjectList
+
+
+def printBeamSpecsToTerminal(beamsObjectList, s=0, n=999):
+    '''
+    Prints the reaction forces for beam s to s + n. This is mostly used for debugging.
+    :param beamsObjectList: A list of beam objects
+    :param s: First beam number
+    :param n: First beam + n is last beam to be printed
     :return: prints to console
     '''
 
@@ -309,135 +297,75 @@ def calculateMaxMomentAndBendingTension(beamsObjectList):
     :return: A list of beam objects
     '''
     for beam in beamsObjectList:
-        beam.calculateMaxMoment()
-        beam.calculateMaxBendingTension()
+        beam.calculateMaxTension()
     return beamsObjectList
 
+
 def outputMomentsToFile(filename, beamsObjectList):
-    f = open(filename+'.txt', 'w')
+    f = open(filename + '.txt', 'w')
     for beam in beamsObjectList:
-        f.write(f'Beam: {beam.number},\t M1: {round(beam.reactionForces[2])}[Nm], \t M2: {round(beam.reactionForces[5])}[Nm]\n')
+        f.write(
+            f'Beam: {beam.number},\t M1: {round(beam.reactionForces[2])}[Nm], \t M2: {round(beam.reactionForces[5])}[Nm]\n')
     f.close
+
 
 def outputSheerToFile(filename, beamsObjectList):
-    f = open(filename+'.txt', 'w')
+    f = open(filename + '.txt', 'w')
     for beam in beamsObjectList:
-        f.write(f'Beam: {beam.number},\t V1: {round(beam.reactionForces[1])}[N], \t V2: {round(beam.reactionForces[4])}[N]\n')
+        f.write(
+            f'Beam: {beam.number},\t V1: {round(beam.reactionForces[1])}[N], \t V2: {round(beam.reactionForces[4])}[N]\n')
     f.close
+
 
 def outputStressToFile(filename, beamsObjectList):
-    f = open(filename+'.txt', 'w')
+    f = open(filename + '.txt', 'w')
     for beam in beamsObjectList:
-        f.write(f'Beam: {beam.number},\t sigma_x: {round(beam.sigmax/10**6,2)}[MPa]\n')
+        f.write(f'Beam: {beam.number},\t sigma_x: {round(beam.sigmax / 10 ** 6, 2)}[MPa]\n')
     f.close
 
+
 def outputNormalForceToFile(filename, beamsObjectList):
-    f = open(filename+'.txt', 'w')
+    f = open(filename + '.txt', 'w')
     for beam in beamsObjectList:
         f.write(f'Beam: {beam.number},\t N: {round(beam.reactionForces[0])}[N]\n')
     f.close
 
+
 def outputDataToFile(beamsObjectList):
     outputMomentsToFile('moments', beamsObjectList)
     outputSheerToFile('sheer', beamsObjectList)
-    outputStressToFile('stress',beamsObjectList)
+    outputStressToFile('stress', beamsObjectList)
     outputNormalForceToFile('normalForce', beamsObjectList)
 
-def getMomentDiagram(L, M1, V1, q1, q2, N):
-    '''
-    Calculates the moment diagram for an element.
-    :param L: length of the element
-    :param M1: Moment at start point for the element
-    :param V1: Shear force at start of the element
-    :param q1: triangle load value at start of element
-    :param q2: triangle load value at end of element
-    :param N: Number of equidistributed moment values calculated along the beam
-    :return: The moment diagram and corresponding x array
-    '''
-    X = np.linspace(0, L, N + 1)
-    dx = L / N
-    momentList = []
 
-    for k in range(N + 1):
-        x = k * dx
-        ms2 = -q2 * (x ** 3 / (6 * L))
-        ms1 = -q1 * (x ** 2 / 2 - x ** 3 / (6 * L))
-        ms0 = -M1 + - x * V1
-        momentList.append(ms0 + ms1 + ms2)
-
-    return np.array(X), np.array(momentList)
-
-
-def plotMomentDiagram(beamsObjectList, N=100):
-    '''
-    Uses getMomentDiagram() and plotterForMomentDiagram() to calculate and plot the moment diagram
-    for each beam exposed to a distributed load.
-    :param beamsObjectList: A list of beam objects
-    :return: nothing
-    '''
-
-    plotList = []
-    beamWithDistributedLoads = []
-
-    for beam in beamsObjectList:
-        # If the beam has a distributed load attached
-        if (beam.distributedLoad):
-            plotList.append(
-                getMomentDiagram(beam.length, beam.reactionForces[2], beam.reactionForces[1], beam.q1, beam.q2, N))
-            beamWithDistributedLoads.append(beam)
-        else:
-            pass
-
-    localMaxMomentForDistributedLoadBeams = plotterForMomentDiagram(plotList, beamWithDistributedLoads, N)
-
-    return localMaxMomentForDistributedLoadBeams
-
-
-def plotterForMomentDiagram(plotList, beamWithDistributedLoads, N):
-    '''
-    Plots a moment diagram and corresponding extreme values.
-    :param plotList: A matrix of moment diagram
-    :param tempBeamList: A list of beams with distributed loads
-    :param N: Number of equidistributed moment values along the beams
-    :return: nothing
-    '''
+def plotMomentDiagram(beamsObjectList):
     Micro = 10 ** -6
-    localMaxMomentForDistributedLoadBeams = []
-    for i in range(len(plotList)):
-        plt.figure(i)
-        plt.plot(plotList[i][0], plotList[i][1] * Micro, c='r', label='M(x)')
-        plt.xlabel('x [ m ]')
-        plt.ylabel('Moment [ MNm ]')
-        plt.title('Bending moment diagram for element ' + str(beamWithDistributedLoads[i].number))
-        plt.grid()
-        plt.plot()
+    i = 0
+    for beam in beamsObjectList:
+        if (beam.hasDistributedLoad):
+            plt.figure(i)
+            plt.plot(np.array(beam.equidistributedX), np.array(beam.momentDiagram) * Micro, c='r', label='M(x)')
+            plt.xlabel('x [ m ]')
+            plt.ylabel('Moment [ MNm ]')
+            plt.title('Bending moment diagram for element ' + str(beam.number))
+            plt.grid()
+            plt.plot()
 
-        # Finds the local moment maximum value
-        if (plotList[i][1][0] < 0):
-            maxValue = np.max(plotList[i][1])
-            iMax = np.argmax(plotList[i][1])
-        else:
-            maxValue = np.min(plotList[i][1])
-            iMax = np.argmin(plotList[i][1])
+            # Extract extreme values and makes the graphs more readable.
+            xMax = beam.localMaxMomentX
+            maxValueMNm = beam.localMaxMoment * Micro
+            startValueMNm = beam.momentDiagram[0] * Micro
+            endValueMNm = beam.momentDiagram[-1] * Micro
+            plt.plot(xMax, maxValueMNm, 'o', c='black',
+                     label='Extream value = ' + str(round(maxValueMNm, 2)) + ' MNm at ' + str(round(xMax, 2)) + ' m')
+            plt.plot(beam.equidistributedX[0], startValueMNm, 'o', c='blue',
+                     label='Start value = ' + str(round(startValueMNm, 2)) + ' MNm at ' + str(
+                         round(beam.equidistributedX[0], 2)) + ' m')
+            plt.plot(beam.equidistributedX[-1], endValueMNm, 'o', c='blue',
+                     label='End value = ' + str(round(endValueMNm, 2)) + ' MNm at ' + str(
+                         round(beam.equidistributedX[-1], 2)) + ' m')
+            plt.legend()
 
-        localMaxMomentForDistributedLoadBeams.append([int(beamWithDistributedLoads[i].number), int(maxValue)])
-
-        # Plots
-        xMax = iMax * beamWithDistributedLoads[i].length / N
-        maxValueMNm = maxValue * Micro
-        startValueMNm = plotList[i][1][0] * Micro
-        endValueMNm = plotList[i][1][-1] * Micro
-        plt.plot(xMax, maxValueMNm, 'o', c='black',
-                 label='Extream value = ' + str(round(maxValueMNm, 2)) + ' MNm at ' + str(round(xMax, 2)) + ' m')
-        plt.plot(plotList[i][0][0], startValueMNm, 'o', c='blue',
-                 label='Start value = ' + str(round(startValueMNm, 2)) + ' MNm at ' + str(
-                     round(plotList[i][0][0], 2)) + ' m')
-        plt.plot(plotList[i][0][-1], endValueMNm, 'o', c='blue',
-                 label='End value = ' + str(round(endValueMNm, 2)) + ' MNm at ' + str(
-                     round(plotList[i][0][-1], 2)) + ' m')
-        plt.legend()
-
-
+            i += 1
 
     plt.show()
-    return np.array(localMaxMomentForDistributedLoadBeams)

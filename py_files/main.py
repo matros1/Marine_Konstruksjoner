@@ -66,12 +66,17 @@ def main():
     # Calculates max moment and bending tension for each beam.
     beamsObjectList = calculateMaxMomentAndBendingTension(beamsObjectList)
 
+    # Makes and appends moment diagrams for beams with distributed loads to beams.
+    beamsObjectList = appendMomentDiagramToBeams(beamsObjectList)
+
     # Prints specifications for each beam to terminal for debugging.
     printBeamSpecsToTerminal(beamsObjectList)
 
-    # Makes and plots moment diagrams.
-    localMaxMomentForDistributedLoadBeams = plotMomentDiagram(beamsObjectList)
-    print(localMaxMomentForDistributedLoadBeams)
+
+
+    # Plots moment diagrams for beams with distributed load.
+    plotMomentDiagram(beamsObjectList)
+
 
     # The handed out code structure_visualization.py is altered to match our code and used to plot our jacket
     # construction. Displacements er scaled by 20.
