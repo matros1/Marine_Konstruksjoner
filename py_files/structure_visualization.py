@@ -11,8 +11,8 @@ def setup_plots():
     '''
     fig_init, ax_init = plt.subplots()
     fig_def, ax_def = plt.subplots()
-    ax_init.set_title('Initialramme')
-    ax_def.set_title('Deformert ramme')
+    ax_init.set_title('Initial Frame')
+    ax_def.set_title('Displaced Frame')
     ax_init.axes.set_aspect('equal')
     ax_def.axes.set_aspect('equal')
     return fig_init, ax_init, fig_def, ax_def
