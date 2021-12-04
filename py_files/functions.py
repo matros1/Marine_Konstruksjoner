@@ -345,7 +345,7 @@ def outputResultsToFile(filename, beamsObjectList, nodesObjectList, r):
             f.write(f' {beam.number}\t\t{round(beam.reactionForces[2]/10**6,2)} \t\t{round(beam.reactionForces[5]/10**6,2)}\t\t{round(beam.localMaxMoment/10**6,2)}\n')
         else:
             f.write(f' {beam.number}\t\t{round(beam.reactionForces[2]/10**6,2)} \t\t{round(beam.reactionForces[5]/10**6,2)}\n')
-    f.write('\nSheer\nBeam\tQ1 [MN]\tQ2 [MN]\n')
+    f.write('\nShear\nBeam\tQ1 [MN]\tQ2 [MN]\n')
     for beam in beamsObjectList:
         f.write(f' {beam.number}\t\t{round(beam.reactionForces[1]/10**6,2)} \t\t{round(beam.reactionForces[4]/10**6,2)}\n')
     f.write('\nAxial Force\nBeam\tN [MN]\n')
