@@ -21,22 +21,21 @@ def readInputFile(filepath):
         if line[0] == "NODE":
             NODE.append(line[1:])
             # x, z, u, w, theta
-            # På u,w,theta er 
-            # 0 = "Denne er ikke fastholdt"
-            # 1 = "Denne er ukjent, må tas med i matrisen"
-            # 2 = "Denne er fastholdt"
+            # u,w,theta: 
+            # 0 = "Not held in place, free to rotate/move"
+            # 1 = "Unknown, needs to be calculated"
+            # 2 = "Held in place, multiplies stiffness by 10^6"
         elif line[0] == "BEAM":
             BEAM.append(line[1:])
             # N1, N2, M, G, n
-            # N1-Node lengst til venstre
-            # N2-Node lengst til høyre
-            # M-Materiale, 1=stål, 2=aluminium
-            # Geometri. 2 = pipe, 1 = IPE
-            # n utvalgt fra biblioteket
+            # N1-Node 1
+            # N2-Node 2
+            # M-Material, 1=steel, 2=aluminium
+            # Geometry. 2 = pipe, 1 = IPE
+            # n geometry from pipe or IPE library
         elif line[0] == "MATERIAL":
             MATERIAL.append(line[1:])
-            # E-modul, flytspenning
-            # 1 er stål og 2 er aluminium
+            # E-modulus, yield stress
         elif line[0] == "NODELOAD":
             NODELOAD.append(line[1:])
             # Nodenr, Fx, Fz, My
@@ -48,6 +47,7 @@ def readInputFile(filepath):
             # outer radius, inner radius
         elif line[0] == "IPE":
             IPE.append(line[1:])
+            # h, b, t_w, t_f
         elif line[0] == "REFERENCEDIAMETER":
             REFERENCEDIAMETER = float(line[1].strip())
         elif line[0] == "---\n":
