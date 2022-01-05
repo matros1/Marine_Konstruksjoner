@@ -73,7 +73,7 @@ def main():
     printBeamSpecsToTerminal(beamsObjectList)
 
     # The handed out code structure_visualization.py is altered to match our code and used to plot our jacket
-    # construction. Displacements er scaled by 20.
+    # construction. Displacements is scaled by 20.
     plot(nodeArray, beamArray, globalDisplacementVector * 20)
 
     # Plots moment diagrams for beams with distributed load.
