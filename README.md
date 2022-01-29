@@ -1,5 +1,5 @@
 # Marine_Konstruksjoner
-Analasys of plane displaceable frame using the matrix-method
+Analysis of plane displaceable frame using the matrix-method
 
 See pdf for full report.
 
